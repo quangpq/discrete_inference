@@ -1,15 +1,14 @@
-from sympy import *
-from sympy.logic.boolalg import *
-from typing import Tuple, FrozenSet, Optional, Set, AnyStr, Dict, SupportsInt
-import re
 from discrete import *
 
+# ((m & n) & p) | ((m & p) & ~p) | ~n -> (m ∧ p) ∨ ¬n
+# (a & ~b & b & ~c) | (a & ~b & ~b & c) | (~a & b & b & ~c) | (~a & b & ~b & c) -> (a & ~b & c) | (~a & b & ~c)
+g = parse_expr('(a & ~b & b & ~c) | (a & ~b & ~b & c) | (~a & b & b & ~c) | (~a & b & ~b & c)',
+               local_dict={'p': p, 'q': q, 'r': r, 's': s, 't': t, 'm': m, 'n': n})
 
-g = parse_expr('(p | q) & (p | s) & (r | t)', local_dict={'p': p, 'q': q, 'r': r, 's': s, 't': t})
+solutions, rules = reduce(g)
 
-result = g
-pprint(result)
+print("++++++++++++++++++++++++++++++")
 
-while result:
-    result = check_rules(result)
-    pprint(result)
+for s, r in zip(solutions, rules):
+    print(r[0])
+    pprint(s)
