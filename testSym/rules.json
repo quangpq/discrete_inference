@@ -1,10 +1,92 @@
-[
+{
+  "group_1": [
     {
-        "name": "a",
-        "rule": "p | (p & q) = p"
+      "name": "Phủ định của phủ định",
+      "rule": "~~p = p"
     },
     {
-        "name": "b",
-        "rule": "p & (p | q) = p"
+      "name": "Luật De Morgan",
+      "rule": "~p | ~q = ~(p & q)"
+    },
+    {
+      "name": "Luật De Morgan",
+      "rule": "~p & ~q = ~(p | q)"
+    },
+    {
+      "name": "Luật phân phối",
+      "rule": "(p | q) & (p | r) = p | (q & r)"
+    },
+    {
+      "name": "Luật phân phối",
+      "rule": "(p & q) | (p & r) = p & (q | r)"
+    },
+    {
+      "name": "Luật lũy đẳng",
+      "rule": "p & p = p"
+    },
+    {
+      "name": "Luật lũy đẳng",
+      "rule": "p | p = p"
+    },
+    {
+      "name": "Luật trung hòa",
+      "rule": "p & True = p"
+    },
+    {
+      "name": "Luật trung hòa",
+      "rule": "p | False = p"
+    },
+    {
+      "name": "Luật về phần tử bù",
+      "rule": "p & ~p = False"
+    },
+    {
+      "name": "Luật về phần tử bù",
+      "rule": "p | ~p = True"
+    },
+    {
+      "name": "Luật thống trị",
+      "rule": "p & False = False"
+    },
+    {
+      "name": "Luật thống trị",
+      "rule": "p | True = True"
+    },
+    {
+      "name": "Luật hấp thụ",
+      "rule": "p & (p | q) = p"
+    },
+    {
+      "name": "Luật hấp thụ",
+      "rule": "p | (p & q) = p"
+    },
+    {
+      "name": "Identity Theorems",
+      "rule": "p | (~p & q) = p | q"
+    },
+    {
+      "name": "Identity Theorems",
+      "rule": "p & (~p | q) = p & q"
     }
-]
+  ],
+  "group_2": [
+    {
+      "name": "Luật kéo theo",
+      "rule": "p >> q = ~p | q"
+    },
+        {
+      "name": "Luật De Morgan",
+      "rule": "~(p & q) = ~p | ~q"
+    },
+        {
+      "name": "Luật De Morgan",
+      "rule": "~(p | q) = ~p & ~q"
+    }
+  ],
+  "group_3": [
+    {
+      "name": "Luật kéo theo",
+      "rule": "~p | q = p >> q"
+    }
+  ]
+}

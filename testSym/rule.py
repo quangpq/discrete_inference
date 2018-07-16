@@ -42,6 +42,39 @@ class Rule:
         return rules
 
     @staticmethod
+    def read_rules(file_name: str) -> (
+            [(str, BooleanFunction, BooleanFunction)], [(str, BooleanFunction, BooleanFunction)],
+            [(str, BooleanFunction, BooleanFunction)]):
+        rules_1 = []
+        rules_2 = []
+        rules_3 = []
+
+        with open(file_name) as f:
+            data = json.load(f)
+            group_1 = data["group_1"]
+            group_2 = data["group_2"]
+            group_3 = data["group_3"]
+            for rule in group_1:
+                rule_left, rule_right = Rule.convert_string_to_rule(rule["rule"])
+                rules_1.append((rule["name"], rule_left, rule_right))
+            for rule in group_2:
+                rule_left, rule_right = Rule.convert_string_to_rule(rule["rule"])
+                rules_2.append((rule["name"], rule_left, rule_right))
+            for rule in group_3:
+                rule_left, rule_right = Rule.convert_string_to_rule(rule["rule"])
+                rules_3.append((rule["name"], rule_left, rule_right))
+
+        return rules_1, rules_2, rules_3
+
+    @staticmethod
+    def convert_string_to_rule(string: str) -> (BooleanFunction, BooleanFunction):
+        rule_strings = string.split("=")
+
+        left_rule_expr = parse_expr(rule_strings[0])
+        right_rule_expr = parse_expr(rule_strings[1])
+        return left_rule_expr, right_rule_expr
+
+    @staticmethod
     def symbols_from_expression(expr: BooleanFunction) -> {Symbol}:
         results = set([x for x in postorder_traversal(expr) if x.func is Symbol])
         return results
