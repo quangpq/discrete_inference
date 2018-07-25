@@ -16,14 +16,22 @@ from reduce import *
 #     print(r[0])
 #     pprint(s)
 
-expr = parse_expr('x & (t | (x & z & (x | y)))')
-expr2 = parse_expr('x & (t | (x & z))')
+# expr = parse_expr('(x >> y) | (z >> y)')
+expr = parse_expr('x | z | (y & z)')
+# expr2 = parse_expr('x & (t | (x & z))')
 
-# rules = Rule.generate_rules(expr)
-#
-# for rule in rules:
-#     print("rule:", rule)
-#     print(Rule.rule_replace(expr, (rule[0], rule[1]))[0])
+rules = Rule.generate_rules(expr)
+for rule in rules:
+    print("rule:", rule)
+    new_ex = Rule.rule_replace(expr, (rule[0], rule[1]))[0]
+    pprint(new_ex)
 
 
-print(Reduce.simpler(expr2, expr))
+# print(Reduce.simpler(expr2, expr))
+
+# min_ex, rules, expr_list = Reduce.reduce(expr)
+# print("-------------------")
+# pprint(min_ex)
+# for ex, r in zip(expr_list, rules):
+#     print(r)
+#     pprint(ex)

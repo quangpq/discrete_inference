@@ -18,17 +18,19 @@ class Rule:
     @staticmethod
     def generate_rules(expr: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
         rules = []
-        rule_strings = 'p & (p | q) = p'.split("=")
+        # rule_strings = 'p & S.false = S.false'.split("=")
+        rule_strings = 'p | (q & r) = (p | q) & (p | r)'.split("=")
 
         left_rule_expr = parse_expr(rule_strings[0])
         right_rule_expr = parse_expr(rule_strings[1])
 
         symbol_set = left_rule_expr.atoms(Symbol)
 
-        expr_symbol_set = expr.atoms(Symbol)
+        expr_symbol_set = set([x for x in preorder_traversal(expr) if not x == expr])
 
         combinations_of_symbols = [list(zip(x, symbol_set)) for x in
                                    itertools.permutations(expr_symbol_set, len(symbol_set))]
+        print(combinations_of_symbols)
         for combination in combinations_of_symbols:
             replace_dict = dict()
             for e, r in combination:
@@ -101,17 +103,31 @@ class Rule:
 
         return expr, False
 
+    # @staticmethod
+    # def _has(expr: BooleanFunction, pattern: BooleanFunction) -> bool:
+    #     def match(ex: BooleanFunction, other: BooleanFunction):
+    #         return ex == other and ex.args.__len__() == other.args.__len__()
+    #     return any(match(pattern, arg) for arg in preorder_traversal(expr))
+
     @staticmethod
     def _rule_replace(e, rule):
         if e.func is Symbol:
             return None
+
+        # Co 2 dang thay the, khac nhau la co cung phep toan hay khong
+        # Dang khong gop chung, vd: p >> q = ~p | q
+        for a in e.args:
+            if a == rule[0]:
+                args = list(e.args)
+                args.remove(a)
+                args.append(rule[1])
+                return e.func(*args)
+
+        # Dang gop, vd: p & (~p | q) = p & q
         expr_args = set(e.args)
         rule_left_args = set(rule[0].args)
         if expr_args.intersection(rule_left_args) == rule_left_args:
-            args = expr_args.difference(rule_left_args)
-            if rule[1].func is Symbol:
-                return e.func(*args, rule[1])
-            else:
-                args = args.union(set(rule[1].args))
+            args = list(expr_args.difference(rule_left_args))
+            args.append(rule[1])
             return e.func(*args)
         return None

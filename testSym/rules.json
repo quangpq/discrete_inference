@@ -30,27 +30,27 @@
     },
     {
       "name": "Luật trung hòa",
-      "rule": "p & True = p"
+      "rule": "p & S.true = p"
     },
     {
       "name": "Luật trung hòa",
-      "rule": "p | False = p"
+      "rule": "p | S.false = p"
     },
     {
       "name": "Luật về phần tử bù",
-      "rule": "p & ~p = False"
+      "rule": "p & ~p = S.false"
     },
     {
       "name": "Luật về phần tử bù",
-      "rule": "p | ~p = True"
+      "rule": "p | ~p = S.true"
     },
     {
       "name": "Luật thống trị",
-      "rule": "p & False = False"
+      "rule": "p & S.false = S.false"
     },
     {
       "name": "Luật thống trị",
-      "rule": "p | True = True"
+      "rule": "p | S.true = S.true"
     },
     {
       "name": "Luật hấp thụ",
