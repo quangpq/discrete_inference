@@ -81,6 +81,14 @@
         {
       "name": "Luật De Morgan",
       "rule": "~(p | q) = ~p & ~q"
+    },
+    {
+      "name": "Luật phân phối",
+      "rule": "p | (q & r) = (p | q) & (p | r)"
+    },
+    {
+      "name": "Luật phân phối",
+      "rule": "p & (q | r) = (p & q) | (p & r)"
     }
   ],
   "group_3": [

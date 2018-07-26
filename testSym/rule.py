@@ -18,7 +18,7 @@ class Rule:
 
     @staticmethod
     def generate_rules(expr: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
-        rule_strings = 'p | S.true = S.true'.split("=")
+        rule_strings = 'p | (q & r) = (p | q) & (p | r)'.split("=")
 
         left_rule_expr = parse_expr(rule_strings[0])
         right_rule_expr = parse_expr(rule_strings[1])
@@ -48,7 +48,7 @@ class Rule:
             checked_expr.add(new_expr)
             print('new expr', new_expr, 'has', expr.has(new_expr))
 
-            if expr.has(new_expr):
+            if new_expr.func is rule.func and new_expr.args.__len__() == rule.args.__len__() and expr.has(new_expr):
                 right_expr = equal_rule.xreplace(replace_dict)
                 rules.append((new_expr, right_expr))
 
@@ -95,20 +95,20 @@ class Rule:
     @staticmethod
     def normalize_expr(expr: BooleanFunction):
 
-        has_true = False
-        has_false = False
-        args = list(expr.args)
-        for i in range(len(args) - 1, -1, -1):
-            if args[i] is true:
-                if has_true:
-                    del args[i]
-                else:
-                    has_true = True
-            elif args[i] is false:
-                if has_false:
-                    del args[i]
-                else:
-                    has_false = True
+        # has_true = False
+        # has_false = False
+        args = set(expr.args)
+        # for i in range(len(args) - 1, -1, -1):
+        #     if args[i] is true:
+        #         if has_true:
+        #             del args[i]
+        #         else:
+        #             has_true = True
+        #     elif args[i] is false:
+        #         if has_false:
+        #             del args[i]
+        #         else:
+        #             has_false = True
 
         return expr.func(*args)
 

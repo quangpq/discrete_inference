@@ -50,10 +50,16 @@ class Reduce:
                     h, new_rule = Rule.rule_replace(ex, temp_r)
                     print("h", h)
                     if new_rule and not ex_set.__contains__(h) and Reduce.simpler(h, ex):
-                        found_result = True
-                        found_expr = h
-                        found_rule = r
                         print("found")
+                        if found_result:
+                            if Reduce.k_degree(found_expr) > Reduce.k_degree(h):
+                                print("choose better rule")
+                                found_expr = h
+                                found_rule = r
+                        else:
+                            found_result = True
+                            found_expr = h
+                            found_rule = r
                         break
                 if found_result:
                     break
