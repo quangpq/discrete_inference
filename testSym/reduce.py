@@ -13,7 +13,7 @@ class Reduce:
         min_expr = g
         temp_expr = g
         old_expr_set = {g}
-        rules_13 = rules_1 + rules_3
+        rules_13 = rules_1 # + rules_3
 
         def step_2(ex, ex_set):
             print("STEP 2")
@@ -177,31 +177,8 @@ class Reduce:
         left_rule_expr = rule[1]
         right_rule_expr = rule[2]
 
-        rules = Reduce.apply_rule(expr, left_rule_expr, right_rule_expr)
+        rules = Rule.apply_rule(expr, left_rule_expr, right_rule_expr)
         # rules.extend(Reduce.apply_rule(expr, right_rule_expr, left_rule_expr))
 
         return rules
 
-    @staticmethod
-    def apply_rule(expr: BooleanFunction, rule: BooleanFunction, equal_rule: BooleanFunction):
-
-        symbol_set = rule.atoms(Symbol)
-
-        expr_symbol_set = expr.atoms(Symbol)
-
-        combinations_of_symbols = [list(zip(x, symbol_set)) for x in
-                                   itertools.permutations(expr_symbol_set, len(symbol_set))]
-
-        rules = []
-
-        for combination in combinations_of_symbols:
-            replace_dict = dict()
-            for e, r in combination:
-                replace_dict[r] = e
-
-            new_expr = rule.subs(replace_dict)
-            if expr.has(new_expr):
-                equal_expr = equal_rule.xreplace(replace_dict)
-                rules.append((new_expr, equal_expr))
-
-        return rules

@@ -3,6 +3,7 @@ from sympy import *
 from sympy.logic.boolalg import *
 from sympy.parsing.sympy_parser import *
 import itertools
+from sympy import sympify
 
 
 class Rule:
@@ -17,28 +18,38 @@ class Rule:
 
     @staticmethod
     def generate_rules(expr: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
-        rules = []
-        # rule_strings = 'p & S.false = S.false'.split("=")
-        rule_strings = 'p | (q & r) = (p | q) & (p | r)'.split("=")
+        rule_strings = 'p | S.true = S.true'.split("=")
 
         left_rule_expr = parse_expr(rule_strings[0])
         right_rule_expr = parse_expr(rule_strings[1])
 
-        symbol_set = left_rule_expr.atoms(Symbol)
+        return Rule.apply_rule(expr, left_rule_expr, right_rule_expr)
 
-        expr_symbol_set = set([x for x in preorder_traversal(expr) if not x == expr])
+    @staticmethod
+    def apply_rule(expr: BooleanFunction, rule: BooleanFunction, equal_rule: BooleanFunction):
+        rules = []
+
+        constant_set = {true, false}
+        symbol_set = set(rule.atoms(Symbol)).difference(constant_set)
+        expr_symbol_set = Rule.generate_sub_expr(expr)
 
         combinations_of_symbols = [list(zip(x, symbol_set)) for x in
                                    itertools.permutations(expr_symbol_set, len(symbol_set))]
-        print(combinations_of_symbols)
+
+        checked_expr = set()
+
         for combination in combinations_of_symbols:
             replace_dict = dict()
             for e, r in combination:
                 replace_dict[r] = e
+            new_expr = Rule.normalize_expr(rule.xreplace(replace_dict))
+            if checked_expr.__contains__(new_expr):
+                continue
+            checked_expr.add(new_expr)
+            print('new expr', new_expr, 'has', expr.has(new_expr))
 
-            new_expr = left_rule_expr.subs(replace_dict)
             if expr.has(new_expr):
-                right_expr = right_rule_expr.xreplace(replace_dict)
+                right_expr = equal_rule.xreplace(replace_dict)
                 rules.append((new_expr, right_expr))
 
         return rules
@@ -82,6 +93,26 @@ class Rule:
         return results
 
     @staticmethod
+    def normalize_expr(expr: BooleanFunction):
+
+        has_true = False
+        has_false = False
+        args = list(expr.args)
+        for i in range(len(args) - 1, -1, -1):
+            if args[i] is true:
+                if has_true:
+                    del args[i]
+                else:
+                    has_true = True
+            elif args[i] is false:
+                if has_false:
+                    del args[i]
+                else:
+                    has_false = True
+
+        return expr.func(*args)
+
+    @staticmethod
     def rule_replace(expr: BooleanFunction, rule):
         if not expr.has(rule[0]):
             return expr, False
@@ -110,24 +141,45 @@ class Rule:
     #     return any(match(pattern, arg) for arg in preorder_traversal(expr))
 
     @staticmethod
+    def generate_sub_expr(expr: BooleanFunction) -> set:
+        expr_symbol_set = set(expr.atoms(Symbol))
+
+        for x in preorder_traversal(expr):
+            if x.func is not Symbol:
+                if not x == expr:
+                    expr_symbol_set.add(x)
+                sym_set = set(x.args)
+                length = 2
+                while length < sym_set.__len__():
+                    for sym_list in itertools.permutations(sym_set, length):
+                        expr_symbol_set.add(x.func(*sym_list))
+                    length += 1
+
+        return expr_symbol_set.difference({true, false})
+
+    @staticmethod
     def _rule_replace(e, rule):
         if e.func is Symbol:
             return None
 
-        # Co 2 dang thay the, khac nhau la co cung phep toan hay khong
-        # Dang khong gop chung, vd: p >> q = ~p | q
-        for a in e.args:
-            if a == rule[0]:
-                args = list(e.args)
-                args.remove(a)
-                args.append(rule[1])
-                return e.func(*args)
+        if e == rule[0]:
+            return rule[1]
 
-        # Dang gop, vd: p & (~p | q) = p & q
+        if rule[0].func is not rule[1].func:
+            # Nếu hai vế có phép toán khác nhau, check xem có thay thế theo một
+            # tham số được không
+            for a in e.args:
+                if a == rule[0]:
+                    args = list(e.args)
+                    i = args.index(a)
+                    args[i] = rule[1]
+                    return e.func(*args)
+        # Nếu không thay thế theo một tham số được thì phải thay theo nhiều tham số
         expr_args = set(e.args)
         rule_left_args = set(rule[0].args)
         if expr_args.intersection(rule_left_args) == rule_left_args:
             args = list(expr_args.difference(rule_left_args))
             args.append(rule[1])
             return e.func(*args)
+
         return None

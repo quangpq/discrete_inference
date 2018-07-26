@@ -14,10 +14,10 @@ rules1 = [
     ('Luật lũy đẳng', lambda arg: arg.func is And and arg.args.__len__() > set(arg.args).__len__(),
      lambda expr, arg: expr.replace(arg, And(*set(arg.args)))),
 
-    ('Luật lũy đẳng', lambda arg: arg.func is Or and arg.args[0] == arg.args[1],
-     lambda expr, arg: expr.replace(arg, arg.args[0])),
-    ('Luật lũy đẳng', lambda arg: arg.func is And and arg.args[0] == arg.args[1],
-     lambda expr, arg: expr.replace(arg, arg.args[0])),
+    # ('Luật lũy đẳng', lambda arg: arg.func is Or and arg.args[0] == arg.args[1],
+    #  lambda expr, arg: expr.replace(arg, arg.args[0])),
+    # ('Luật lũy đẳng', lambda arg: arg.func is And and arg.args[0] == arg.args[1],
+    #  lambda expr, arg: expr.replace(arg, arg.args[0])),
 
     ('Luật De Morgan', lambda arg: arg.func is Not and arg.args[0].func is And,
      lambda expr, arg: expr.replace(arg, Or(
@@ -50,23 +50,19 @@ rules1 = [
 
     ('Luật hấp thụ', lambda arg: arg.func is Or and any(
         x for x in arg.args if x.func is And and any(y for y in arg.args if list(x.args).__contains__(y))),
-     lambda expr, arg: identity_law(expr, arg)),
-
-    ('Luật hấp thụ', lambda arg: arg.func is Or and any(
-        x for x in arg.args if x.func is And and any(y for y in arg.args if list(x.args).__contains__(y))),
-     lambda expr, arg: identity_law(expr, arg)),
+     lambda expr, arg: absorption_law(expr, arg)),
     ('Luật hấp thụ', lambda arg: arg.func is And and any(
         x for x in arg.args if x.func is Or and any(y for y in arg.args if list(x.args).__contains__(y))),
-     lambda expr, arg: identity_law(expr, arg)),
+     lambda expr, arg: absorption_law(expr, arg)),
 
     ('Luật phân phối', lambda arg: arg.func is And and any(
         x for x in arg.args if
         x.func is Or and any(
             y for y in arg.args if y.func is Or and x != y and set(y.args).intersection(set(x.args)).__len__() > 0)),
-     lambda expr, arg: revert_absorption_law(expr, arg)),
+     lambda expr, arg: revert_distributive_law(expr, arg)),
     ('Luật phân phối', lambda arg: arg.func is Or and any(x for x in arg.args if x.func is And and any(
         y for y in arg.args if y.func is And and x != y and set(y.args).intersection(set(x.args)).__len__() > 0)),
-     lambda expr, arg: revert_absorption_law(expr, arg)),
+     lambda expr, arg: revert_distributive_law(expr, arg)),
 ]
 
 # tăng kích thước biểu thức
@@ -96,7 +92,7 @@ def negation_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFunction
     return expr.replace(arg, sub_expr)
 
 
-def identity_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFunction:
+def absorption_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFunction:
     args = list(arg.args)
     remove_func = And if arg.func is Or else Or
     remove_args = set(
@@ -110,7 +106,7 @@ def identity_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFunction
     return expr.replace(arg, sub_expr)
 
 
-def absorption_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFunction:
+def distributive_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFunction:
     args = list(arg.args)
     func = And if arg.func is Or else Or
 
@@ -142,7 +138,7 @@ def absorption_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFuncti
     return expr.replace(arg, arg.func(*small_args))
 
 
-def revert_absorption_law(expr: BooleanFunction, arg: BooleanFunction) -> Optional[BooleanFunction]:
+def revert_distributive_law(expr: BooleanFunction, arg: BooleanFunction) -> Optional[BooleanFunction]:
     absorption_var = set()
     func = And if arg.func is Or else Or
 
@@ -172,7 +168,7 @@ def revert_absorption_law(expr: BooleanFunction, arg: BooleanFunction) -> Option
     return expr.replace(arg, sub_expr)
 
 
-def associative_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFunction:
+def identity_law(expr: BooleanFunction, arg: BooleanFunction) -> BooleanFunction:
     args = list(arg.args)
     remove_args = false if arg.func is Or else true
 
