@@ -66,7 +66,23 @@
     },
     {
       "name": "Identity Theorems",
+      "rule": "~p | (p & q) = ~p | q"
+    },
+    {
+      "name": "Identity Theorems",
       "rule": "p & (~p | q) = p & q"
+    },
+    {
+      "name": "Identity Theorems",
+      "rule": "~p & (p | q) = ~p & q"
+    },
+    {
+      "name": "Phủ định của true",
+      "rule": "~S.true = S.false"
+    },
+    {
+      "name": "Phủ đinh của false",
+      "rule": "~S.false = S.true"
     }
   ],
   "group_2": [
@@ -74,7 +90,11 @@
       "name": "Luật kéo theo",
       "rule": "p >> q = ~p | q"
     },
-        {
+    {
+      "name": "Luật kéo theo",
+      "rule": "~p >> q = p | q"
+    },
+    {
       "name": "Luật De Morgan",
       "rule": "~(p & q) = ~p | ~q"
     },
@@ -95,6 +115,10 @@
     {
       "name": "Luật kéo theo",
       "rule": "~p | q = p >> q"
+    },
+    {
+      "name": "Luật kéo theo",
+      "rule": "p | q = ~p >> q"
     }
   ]
 }

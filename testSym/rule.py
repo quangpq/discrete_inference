@@ -18,7 +18,7 @@ class Rule:
 
     @staticmethod
     def generate_rules(expr: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
-        rule_strings = 'p | (q & r) = (p | q) & (p | r)'.split("=")
+        rule_strings = 'p & (q | r) = (p & q) | (p & r)'.split("=")
 
         left_rule_expr = parse_expr(rule_strings[0])
         right_rule_expr = parse_expr(rule_strings[1])
@@ -42,13 +42,14 @@ class Rule:
             replace_dict = dict()
             for e, r in combination:
                 replace_dict[r] = e
-            new_expr = Rule.normalize_expr(rule.xreplace(replace_dict))
+            new_expr = Rule.normalize_constant_in_expr(rule.xreplace(replace_dict))
             if checked_expr.__contains__(new_expr):
                 continue
             checked_expr.add(new_expr)
-            print('new expr', new_expr, 'has', expr.has(new_expr))
-
-            if new_expr.func is rule.func and new_expr.args.__len__() == rule.args.__len__() and expr.has(new_expr):
+            # print('new expr', new_expr, 'has', expr.has(new_expr))
+            normal_expr = Rule.normalize_duplicate_in_expr(new_expr)
+            if new_expr.func is rule.func and new_expr == normal_expr \
+                    and new_expr.args.__len__() == rule.args.__len__() and expr.has(new_expr):
                 right_expr = equal_rule.xreplace(replace_dict)
                 rules.append((new_expr, right_expr))
 
@@ -93,23 +94,28 @@ class Rule:
         return results
 
     @staticmethod
-    def normalize_expr(expr: BooleanFunction):
+    def normalize_constant_in_expr(expr: BooleanFunction):
 
-        # has_true = False
-        # has_false = False
+        has_true = False
+        has_false = False
+        args = list(expr.args)
+        for i in range(len(args) - 1, -1, -1):
+            if args[i] is true:
+                if has_true:
+                    del args[i]
+                else:
+                    has_true = True
+            elif args[i] is false:
+                if has_false:
+                    del args[i]
+                else:
+                    has_false = True
+
+        return expr.func(*args)
+
+    @staticmethod
+    def normalize_duplicate_in_expr(expr: BooleanFunction):
         args = set(expr.args)
-        # for i in range(len(args) - 1, -1, -1):
-        #     if args[i] is true:
-        #         if has_true:
-        #             del args[i]
-        #         else:
-        #             has_true = True
-        #     elif args[i] is false:
-        #         if has_false:
-        #             del args[i]
-        #         else:
-        #             has_false = True
-
         return expr.func(*args)
 
     @staticmethod
@@ -118,7 +124,7 @@ class Rule:
             return expr, False
 
         result = Rule._rule_replace(expr, rule)
-        if result:
+        if result or result == false:
             return result, True
         else:
             args = []

@@ -21,15 +21,15 @@ class Reduce:
             found_expr = None
             found_rule = None
             for r in rules_2:
-                print("r", r)
                 temp_rules = Reduce.apply_equal_rule(ex, r)
                 for temp_r in temp_rules:
-                    print("temp_r", temp_r)
+                    # print("temp_r", temp_r)
                     h, new_rule = Rule.rule_replace(ex, temp_r)
                     if new_rule and not ex_set.__contains__(h):
                         found_result = True
                         found_expr = h
                         found_rule = r
+                        print("r", r)
                         print("h", h)
                         print("found")
                         break
@@ -43,12 +43,12 @@ class Reduce:
             found_expr = None
             found_rule = None
             for r in rules_13:
-                print("r", r)
+                # print("r", r)
                 temp_rules = Reduce.apply_equal_rule(ex, r)
                 for temp_r in temp_rules:
-                    print("temp_r", temp_r)
+                    # print("temp_r", temp_r)
                     h, new_rule = Rule.rule_replace(ex, temp_r)
-                    print("h", h)
+                    # print("h", h)
                     if new_rule and not ex_set.__contains__(h) and Reduce.simpler(h, ex):
                         print("found")
                         if found_result:
@@ -60,6 +60,8 @@ class Reduce:
                             found_result = True
                             found_expr = h
                             found_rule = r
+                        print("r", r)
+                        print("h", h)
                         break
                 if found_result:
                     break
@@ -79,19 +81,25 @@ class Reduce:
         while found and Reduce.k_degree(min_expr) > 0:
             found = False
             for r in rules_1:
-                print("r", r)
                 temp_rules = Reduce.apply_equal_rule(min_expr, r)
                 for temp_r in temp_rules:
-                    print("temp_r", temp_r)
                     h, new_rule = Rule.rule_replace(min_expr, temp_r)
                     if new_rule and not old_expr_set.__contains__(h) and Reduce.simpler(h, min_expr):
-                        found = True
-                        rules.append(r)
-                        expr_list.append(h)
-                        old_expr_set.add(h)
-                        min_expr = h
-                        temp_expr = h
+                        if found:
+                            print("choose better rule")
+                            rules.append(r)
+                            expr_list.append(h)
+                            old_expr_set.add(h)
+                            min_expr = h
+                            temp_expr = h
+                        else:
+                            rules.append(r)
+                            expr_list.append(h)
+                            old_expr_set.add(h)
+                            min_expr = h
+                            temp_expr = h
                         print("h", h)
+                        print("r", r)
                         print("found")
                         break
                 if found:
@@ -125,7 +133,7 @@ class Reduce:
         found = True
         while found and Reduce.k_degree(temp_expr) > 0:
             found, f_expr, f_rule = step_3(temp_expr, old_expr_set)
-            if f_expr and f_rule:
+            if (f_expr or f_expr is false) and f_rule:
                 rules.append(f_rule)
                 expr_list.append(f_expr)
                 old_expr_set.add(f_expr)
@@ -159,7 +167,7 @@ class Reduce:
         return args_count - args_set_count + not_count
 
     @staticmethod
-    def simpler(expr_1: BooleanFunction, expr_2: BooleanFunction) -> bool:
+    def simple_degree(expr: BooleanFunction) -> int:
         def height(expr: BooleanFunction) -> int:
             sub_expr = [arg for arg in expr.args if
                         arg.func is not Symbol and arg.func is not BooleanFalse and arg.func is not BooleanTrue]
@@ -176,7 +184,11 @@ class Reduce:
 
             return count
 
-        return length(expr_1) <= length(expr_2) and height(expr_1) <= height(expr_2)
+        return length(expr) + height(expr)
+
+    @staticmethod
+    def simpler(expr_1: BooleanFunction, expr_2: BooleanFunction) -> bool:
+        return Reduce.simple_degree(expr_1) <= Reduce.simple_degree(expr_2)
 
     @staticmethod
     def apply_equal_rule(expr: BooleanFunction, rule):
