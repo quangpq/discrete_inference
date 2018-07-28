@@ -3,22 +3,27 @@ from rule import *
 
 class Reduce:
     @staticmethod
-    def reduce(expr: BooleanFunction):
+    def reduce_expr_string(ex_str: str):
+        ex = parse_expr(ex_str)
+        return Reduce.reduce(ex)
+
+    @staticmethod
+    def reduce(ex: BooleanFunction):
 
         # Step 0
         rules_1, rules_2, rules_3 = Rule.read_rules("rules.json")
-        g = expr
+        g = ex
         rules = []
-        expr_list = []
-        min_expr = g
-        temp_expr = g
-        old_expr_set = {g}
+        ex_list = []
+        min_ex = g
+        temp_ex = g
+        old_ex_set = {g}
         rules_13 = rules_1 # + rules_3
 
         def step_2(ex, ex_set):
             print("STEP 2")
             found_result = False
-            found_expr = None
+            found_ex = None
             found_rule = None
             for r in rules_2:
                 temp_rules = Reduce.apply_equal_rule(ex, r)
@@ -27,7 +32,7 @@ class Reduce:
                     h, new_rule = Rule.rule_replace(ex, temp_r)
                     if new_rule and not ex_set.__contains__(h):
                         found_result = True
-                        found_expr = h
+                        found_ex = h
                         found_rule = r
                         print("r", r)
                         print("h", h)
@@ -35,12 +40,12 @@ class Reduce:
                         break
                 if found_result:
                     break
-            return found_result, found_expr, found_rule
+            return found_result, found_ex, found_rule
 
         def step_3(ex, ex_set):
             print("STEP 3")
             found_result = False
-            found_expr = None
+            found_ex = None
             found_rule = None
             for r in rules_13:
                 # print("r", r)
@@ -52,52 +57,52 @@ class Reduce:
                     if new_rule and not ex_set.__contains__(h) and Reduce.simpler(h, ex):
                         print("found")
                         if found_result:
-                            if Reduce.k_degree(found_expr) > Reduce.k_degree(h):
+                            if Reduce.k_degree(found_ex) > Reduce.k_degree(h):
                                 print("choose better rule")
-                                found_expr = h
+                                found_ex = h
                                 found_rule = r
                         else:
                             found_result = True
-                            found_expr = h
+                            found_ex = h
                             found_rule = r
                         print("r", r)
                         print("h", h)
                         break
                 if found_result:
                     break
-            return found_result, found_expr, found_rule
+            return found_result, found_ex, found_rule
 
         def step_4(min_ex, temp_ex, ex_list, rule_list):
             if min_ex == temp_ex:
                 return ex_list, rule_list
             if min_ex in ex_list:
-                i = ex_list.index(min_expr)
+                i = ex_list.index(min_ex)
                 return ex_list[0:i + 1], rule_list[0:i + 1]
             else:
                 return ex_list, rule_list
 
         # Step 1
         found = True
-        while found and Reduce.k_degree(min_expr) > 0:
+        while found and Reduce.k_degree(min_ex) > 0:
             found = False
             for r in rules_1:
-                temp_rules = Reduce.apply_equal_rule(min_expr, r)
+                temp_rules = Reduce.apply_equal_rule(min_ex, r)
                 for temp_r in temp_rules:
-                    h, new_rule = Rule.rule_replace(min_expr, temp_r)
-                    if new_rule and not old_expr_set.__contains__(h) and Reduce.simpler(h, min_expr):
+                    h, new_rule = Rule.rule_replace(min_ex, temp_r)
+                    if new_rule and not old_ex_set.__contains__(h) and Reduce.simpler(h, min_ex):
                         if found:
                             print("choose better rule")
                             rules.append(r)
-                            expr_list.append(h)
-                            old_expr_set.add(h)
-                            min_expr = h
-                            temp_expr = h
+                            ex_list.append(h)
+                            old_ex_set.add(h)
+                            min_ex = h
+                            temp_ex = h
                         else:
                             rules.append(r)
-                            expr_list.append(h)
-                            old_expr_set.add(h)
-                            min_expr = h
-                            temp_expr = h
+                            ex_list.append(h)
+                            old_ex_set.add(h)
+                            min_ex = h
+                            temp_ex = h
                         print("h", h)
                         print("r", r)
                         print("found")
@@ -106,59 +111,59 @@ class Reduce:
                     break
 
         # if rules.__len__() == 0:
-        #     return min_expr, rules  # to step 2
+        #     return min_ex, rules  # to step 2
         # el
-        if min_expr.args.__len__() == 1 and (
-                min_expr.args[0].func is BooleanTrue or min_expr.args[0].func is BooleanFalse):
-            expr_list, rules = step_4(min_expr, temp_expr, expr_list, rules)
-            return min_expr, rules, expr_list  # to step 4
+        if min_ex.args.__len__() == 1 and (
+                min_ex.args[0].func is BooleanTrue or min_ex.args[0].func is BooleanFalse):
+            ex_list, rules = step_4(min_ex, temp_ex, ex_list, rules)
+            return min_ex, rules, ex_list  # to step 4
 
         # Step 2
         print("STEP 2")
-        found, f_expr, f_rule = step_2(temp_expr, old_expr_set)
+        found, f_ex, f_rule = step_2(temp_ex, old_ex_set)
 
-        if f_expr and f_rule:
+        if f_ex and f_rule:
             rules.append(f_rule)
-            expr_list.append(f_expr)
-            old_expr_set.add(f_expr)
-            temp_expr = f_expr
+            ex_list.append(f_ex)
+            old_ex_set.add(f_ex)
+            temp_ex = f_ex
 
         if not found:
-            expr_list, rules = step_4(min_expr, temp_expr, expr_list, rules)
-            return min_expr, rules, expr_list  # to step 4
+            ex_list, rules = step_4(min_ex, temp_ex, ex_list, rules)
+            return min_ex, rules, ex_list  # to step 4
 
         # Step 3
         print("STEP 3")
         can_expand = True
         found = True
-        while found and Reduce.k_degree(temp_expr) > 0:
-            found, f_expr, f_rule = step_3(temp_expr, old_expr_set)
-            if (f_expr or f_expr is false) and f_rule:
+        while found and Reduce.k_degree(temp_ex) > 0:
+            found, f_ex, f_rule = step_3(temp_ex, old_ex_set)
+            if (f_ex or f_ex is false) and f_rule:
                 rules.append(f_rule)
-                expr_list.append(f_expr)
-                old_expr_set.add(f_expr)
-                temp_expr = f_expr
-                if Reduce.simpler(f_expr, min_expr):
-                    min_expr = f_expr
+                ex_list.append(f_ex)
+                old_ex_set.add(f_ex)
+                temp_ex = f_ex
+                if Reduce.simpler(f_ex, min_ex):
+                    min_ex = f_ex
 
-            if not found and (can_expand or Reduce.k_degree(temp_expr) <= 0):
-                can_expand, f_expr, f_rule = step_2(temp_expr, old_expr_set)
+            if not found and (can_expand or Reduce.k_degree(temp_ex) <= 0):
+                can_expand, f_ex, f_rule = step_2(temp_ex, old_ex_set)
                 found = can_expand
-                if f_expr and f_rule:
+                if f_ex and f_rule:
                     rules.append(f_rule)
-                    expr_list.append(f_expr)
-                    old_expr_set.add(f_expr)
-                    temp_expr = f_expr
+                    ex_list.append(f_ex)
+                    old_ex_set.add(f_ex)
+                    temp_ex = f_ex
 
-        expr_list, rules = step_4(min_expr, temp_expr, expr_list, rules)
-        return min_expr, rules, expr_list
+        ex_list, rules = step_4(min_ex, temp_ex, ex_list, rules)
+        return min_ex, rules, ex_list
 
     @staticmethod
-    def k_degree(expr: BooleanFunction) -> int:
-        args = [arg for arg in postorder_traversal(expr) if
+    def k_degree(ex: BooleanFunction) -> int:
+        args = [arg for arg in postorder_traversal(ex) if
                 arg.func is Symbol or arg.func is BooleanFalse or arg.func is BooleanTrue]
 
-        not_count = [arg for arg in postorder_traversal(expr) if arg.func is Not].__len__()
+        not_count = [arg for arg in postorder_traversal(ex) if arg.func is Not].__len__()
 
         args_count = args.__len__()
 
@@ -167,36 +172,36 @@ class Reduce:
         return args_count - args_set_count + not_count
 
     @staticmethod
-    def simple_degree(expr: BooleanFunction) -> int:
-        def height(expr: BooleanFunction) -> int:
-            sub_expr = [arg for arg in expr.args if
+    def simple_degree(ex: BooleanFunction) -> int:
+        def height(ex: BooleanFunction) -> int:
+            sub_ex = [arg for arg in ex.args if
                         arg.func is not Symbol and arg.func is not BooleanFalse and arg.func is not BooleanTrue]
-            if sub_expr.__len__() == 0:
+            if sub_ex.__len__() == 0:
                 return 1
             else:
-                return max([height(ex) for ex in sub_expr]) + 1
+                return max([height(ex) for ex in sub_ex]) + 1
 
-        def length(expr) -> int:
+        def length(ex) -> int:
             count = 0
-            for arg in postorder_traversal(expr):
+            for arg in postorder_traversal(ex):
                 if arg.func is Symbol or arg.func is BooleanFalse or arg.func is BooleanTrue or arg.func is Not:
                     count += 1
 
             return count
 
-        return length(expr) + height(expr)
+        return length(ex) + height(ex)
 
     @staticmethod
-    def simpler(expr_1: BooleanFunction, expr_2: BooleanFunction) -> bool:
-        return Reduce.simple_degree(expr_1) <= Reduce.simple_degree(expr_2)
+    def simpler(ex_1: BooleanFunction, ex_2: BooleanFunction) -> bool:
+        return Reduce.simple_degree(ex_1) <= Reduce.simple_degree(ex_2)
 
     @staticmethod
-    def apply_equal_rule(expr: BooleanFunction, rule):
-        left_rule_expr = rule[1]
-        right_rule_expr = rule[2]
+    def apply_equal_rule(ex: BooleanFunction, rule):
+        left_rule_ex = rule[1]
+        right_rule_ex = rule[2]
 
-        rules = Rule.apply_rule(expr, left_rule_expr, right_rule_expr)
-        # rules.extend(Reduce.apply_rule(expr, right_rule_expr, left_rule_expr))
+        rules = Rule.apply_rule(ex, left_rule_ex, right_rule_ex)
+        # rules.extend(Reduce.apply_rule(ex, right_rule_ex, left_rule_ex))
 
         return rules
 

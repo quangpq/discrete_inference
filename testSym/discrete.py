@@ -1,142 +1,137 @@
-from sympy import *
-from sympy.logic.boolalg import *
-from typing import Tuple, FrozenSet, Optional, Set, AnyStr, Dict, SupportsInt
-import re
-import sys
-from sympy.parsing.sympy_parser import *
-import discrete_rules
-
-# a, b, c, p, q, r, s, t, m, n = symbols('a b c p q r s t m n')
+from discrete_rules import *
 
 
-def k_degree(expr: BooleanFunction) -> int:
-    args = [arg for arg in postorder_traversal(expr) if
-            arg.func is Symbol or arg.func is BooleanFalse or arg.func is BooleanTrue]
-    # func_count = [arg for arg in postorder_traversal(expr) if arg.func is BooleanFunction].__len__()
+class Discrete:
+    @staticmethod
+    def k_degree(ex: BooleanFunction) -> int:
+        ags = [ag for ag in postorder_traversal(ex) if
+               ag.func is Symbol or ag.func is BooleanFalse or ag.func is BooleanTrue]
+        # func_count = [ag for ag in postorder_traversal(ex) if ag.func is BooleanFunction].__len__()
 
-    args_count = args.__len__()
-    args_set_count = set(args).__len__()
-    return args_count - args_set_count  # + func_count
+        ags_count = ags.__len__()
+        ags_set_count = set(ags).__len__()
+        return ags_count - ags_set_count  # + func_count
 
-
-def reduce(expr: BooleanFunction):
-    new_expr = expr
-    pprint(new_expr)
-    solutions = []
-    rules = []
-    current_k = k_degree(new_expr)
-    print("-------------------------------")
-    while new_expr:
-        temp_expr, rule, arg = find_rules(new_expr)
-        if not temp_expr:
-            break
-        if check_duplicated_rule(solutions, temp_expr):  # Thuật toán bị rơi vào vòng lặp của các phép biến đổi
-            print("LOOP")
-            temp_expr, rule, arg = find_rules(new_expr, [rule], [arg])
-
-            if not temp_expr:
-                print("{{{{{{")
-                clean_up_result(solutions, rules)
-                print("}}}}}}")
-                break
-        new_expr = temp_expr
-        solutions.append(new_expr)
-        rules.append(rule)
-        print("\n")
-        pprint(new_expr)
-        print(new_expr)
+    @staticmethod
+    def reduce(ex: BooleanFunction):
+        new_ex = ex
+        pprint(new_ex)
+        solutions = []
+        rules = []
+        current_k = Discrete.k_degree(new_ex)
         print("-------------------------------")
-        current_k = k_degree(new_expr)
-        if current_k == 0:  # tìm được biểu thức tốt nhất
-            break
+        while new_ex:
+            temp_ex, rule, ag = Discrete.find_rules(new_ex)
+            if not temp_ex:
+                break
+            if Discrete.check_duplicated_rule(solutions,
+                                              temp_ex):  # Thuật toán bị rơi vào vòng lặp của các phép biến đổi
+                print("LOOP")
+                temp_ex, rule, ag = Discrete.find_rules(new_ex, [rule], [ag])
 
-    return solutions, rules
-
-
-def check_duplicated_rule(a_list, item):
-    p_rule = pretty(item)
-    for r in a_list:
-        if p_rule == pretty(r):
-            return True
-    return False
-
-
-def clean_up_result(solutions, rules):
-    for s, r in zip(solutions, rules):
-        print(r[0])
-        pprint(s)
-    print("-------------------------------")
-    for i, sol in enumerate(reversed(solutions)):
-        if i > 1:
-            k_before = k_degree(solutions[i - 1])
-            k = k_degree(solutions[i])
-            if k_before < k:
-                rules.remove(rules[i])
-                solutions.remove(solutions[i])
+                if not temp_ex:
+                    print("{{{{{{")
+                    Discrete.clean_up_result(solutions, rules)
+                    print("}}}}}}")
+                    break
+            new_ex = temp_ex
+            solutions.append(new_ex)
+            rules.append(rule)
+            print("\n")
+            pprint(new_ex)
+            print(new_ex)
+            print("-------------------------------")
+            current_k = Discrete.k_degree(new_ex)
+            if current_k == 0:  # tìm được biểu thức tốt nhất
                 break
 
-    for s, r in zip(solutions, rules):
-        print(r[0])
-        pprint(s)
+        return solutions, rules
 
+    @staticmethod
+    def check_duplicated_rule(a_list, item):
+        p_rule = pretty(item)
+        for r in a_list:
+            if p_rule == pretty(r):
+                return True
+        return False
 
-def find_rules(expr: BooleanFunction, exclusion_rules=None, exclusion_args=None):
-    result_from_rules1, rule, arg = find_a_rule(expr, discrete_rules.rules1, exclusion_rules, exclusion_args)
-    if result_from_rules1:
-        return result_from_rules1, rule, arg
-    else:
-        return find_a_rule(expr, discrete_rules.rules2, exclusion_rules, exclusion_args)
+    @staticmethod
+    def clean_up_result(solutions, rules):
+        for s, r in zip(solutions, rules):
+            print(r[0])
+            pprint(s)
+        print("-------------------------------")
+        for i, sol in enumerate(reversed(solutions)):
+            if i > 1:
+                k_before = Discrete.k_degree(solutions[i - 1])
+                k = Discrete.k_degree(solutions[i])
+                if k_before < k:
+                    rules.remove(rules[i])
+                    solutions.remove(solutions[i])
+                    break
 
+        for s, r in zip(solutions, rules):
+            print(r[0])
+            pprint(s)
 
-def find_a_rule(expr: BooleanFunction, rules, exclusion_rules=None, exclusion_args=None):
-    best_k = sys.maxsize
-    best_rule = None
-    best_expr = None
-    changed_arg = None
-    for arg in postorder_traversal(expr):
-        if arg.func is Symbol:
-            continue
-        for rule in rules:
-            if exclusion_rules and exclusion_rules.__contains__(
-                    rule) and exclusion_args and exclusion_args.__contains__(arg):
+    @staticmethod
+    def find_rules(ex: BooleanFunction, exclusion_rules=None, exclusion_args=None):
+        result_from_rules1, rule, ag = Discrete.find_a_rule(ex, DiscreteRule.rules1, exclusion_rules, exclusion_args)
+        if result_from_rules1:
+            return result_from_rules1, rule, ag
+        else:
+            return Discrete.find_a_rule(ex, DiscreteRule.rules2, exclusion_rules, exclusion_args)
+
+    @staticmethod
+    def find_a_rule(ex: BooleanFunction, rules, exclusion_rules=None, exclusion_args=None):
+        best_k = sys.maxsize
+        best_rule = None
+        best_ex = None
+        changed_ag = None
+        for ag in postorder_traversal(ex):
+            if ag.func is Symbol:
                 continue
-            if rule[1](arg):
-                new_expr = rule[2](expr, arg)
-                if not new_expr:
+            for rule in rules:
+                if exclusion_rules and exclusion_rules.__contains__(
+                        rule) and exclusion_args and exclusion_args.__contains__(ag):
                     continue
-                k = k_degree(new_expr)
-                print(rule[0], ":", k)
-                pprint(new_expr)
-                if k < best_k:
-                    best_k = k
-                    best_rule = rule
-                    best_expr = new_expr
-                    changed_arg = arg
-                    print("---", rule[0])
-    if best_rule:
-        return best_expr, best_rule, changed_arg
-    return None, None, None
+                if rule[1](ag):
+                    new_ex = rule[2](ex, ag)
+                    if not new_ex:
+                        continue
+                    k = Discrete.k_degree(new_ex)
+                    print(rule[0], ":", k)
+                    pprint(new_ex)
+                    if k < best_k:
+                        best_k = k
+                        best_rule = rule
+                        best_ex = new_ex
+                        changed_ag = ag
+                        print("---", rule[0])
+        if best_rule:
+            return best_ex, best_rule, changed_ag
+        return None, None, None
 
-# def find_a_type_2_rule(expr: BooleanFunction, rules):
+# def find_a_type_2_rule(ex: BooleanFunction, rules):
 #     best_k = sys.maxsize
 #     best_rule = None
-#     best_expr = None
-#     for arg in postorder_traversal(expr):
-#         if arg.func is Symbol:
+#     best_ex = None
+#     for ag in postorder_traversal(ex):
+#         if ag.func is Symbol:
 #             continue
 #         for rule in rules:
-#             if rule[1](arg):
-#                 new_expr = rule[2](expr, arg)
-#                 k = k_degree(new_expr)
-#                 k1 = k_degree(expr)
-#                 print(rule[0], ":", new_expr, k1, k)
+#             if rule[1](ag):
+#                 new_ex = rule[2](ex, ag)
+#                 k = k_degree(new_ex)
+#                 k1 = k_degree(ex)
+#                 print(rule[0], ":", new_ex, k1, k)
 #                 if k < best_k:  # & k < previous_k:
 #                     best_k = k
 #                     best_rule = rule
-#                     best_expr = new_expr
+#                     best_ex = new_ex
 #                     print(rule[0])
 #     if best_rule:
-#         return best_expr, best_rule
+#         return best_ex, best_rule
 #     return None, None
 
 # h = q | (~p | ~(p & r))
@@ -145,9 +140,8 @@ def find_a_rule(expr: BooleanFunction, rules, exclusion_rules=None, exclusion_ar
 
 # Add(q, q, p,  evaluate=False)
 # with evaluate(False):
-#     f = g.replace({j: Or(*list(map(lambda x: Not(x), list(j.args[0].args))))})
+#     f = g.replace({j: Or(*list(map(lambda x: Not(x), list(j.ags[0].args))))})
 # absorption_law(g, g)
-
 
 
 # Rule = Tuple[FrozenSet, BooleanFunction, BooleanFunction]
@@ -236,13 +230,13 @@ def find_a_rule(expr: BooleanFunction, rules, exclusion_rules=None, exclusion_ar
 #     return solution
 
 
-# def apply_rule(rule: Rule, expr: str) -> str:
-#     return expr.replace(str(rule[1]), str(rule[2]))
+# def apply_rule(rule: Rule, ex: str) -> str:
+#     return ex.replace(str(rule[1]), str(rule[2]))
 
 
-# def find_rule(rules: Set[Rule], expr: str) -> Optional[Rule]:
+# def find_rule(rules: Set[Rule], ex: str) -> Optional[Rule]:
 #     for rule in rules:
-#         if expr.__contains__(str(rule[1])):
+#         if ex.__contains__(str(rule[1])):
 #             return rule
 #
 #     return None

@@ -5,7 +5,6 @@ from sympy.parsing.sympy_parser import *
 import itertools
 from sympy import sympify
 
-
 class Rule:
     @staticmethod
     def load_rules() -> [(str, str)]:
@@ -17,41 +16,56 @@ class Rule:
         return rules
 
     @staticmethod
-    def generate_rules(expr: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
-        rule_strings = 'p & (q | r) = (p & q) | (p & r)'.split("=")
-
-        left_rule_expr = parse_expr(rule_strings[0])
-        right_rule_expr = parse_expr(rule_strings[1])
-
-        return Rule.apply_rule(expr, left_rule_expr, right_rule_expr)
+    def generate_rules_from_str(ex_str: str) -> [(BooleanFunction, BooleanFunction)]:
+        ex = parse_expr(ex_str)
+        return Rule.generate_rules(ex)
 
     @staticmethod
-    def apply_rule(expr: BooleanFunction, rule: BooleanFunction, equal_rule: BooleanFunction):
+    def generate_rules(ex: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
+        rule_strings = 'p & (q | r) = (p & q) | (p & r)'.split("=")
+
+        left_rule_ex = parse_expr(rule_strings[0])
+        right_rule_ex = parse_expr(rule_strings[1])
+
+        return Rule.apply_rule(ex, left_rule_ex, right_rule_ex)
+
+    @staticmethod
+    def find_all_rules_of_expr_str(ex_str: str):
+        ex = parse_expr(ex_str)
+        rules = Rule.generate_rules(ex)
+        ex_list = []
+        for rule in rules:
+            new_ex = Rule.rule_replace(ex, (rule[0], rule[1]))[0]
+            ex_list.append(new_ex)
+        return rules, ex_list
+
+    @staticmethod
+    def apply_rule(ex: BooleanFunction, rule: BooleanFunction, equal_rule: BooleanFunction):
         rules = []
 
         constant_set = {true, false}
         symbol_set = set(rule.atoms(Symbol)).difference(constant_set)
-        expr_symbol_set = Rule.generate_sub_expr(expr)
+        ex_symbol_set = Rule.generate_sub_expr(ex)
 
         combinations_of_symbols = [list(zip(x, symbol_set)) for x in
-                                   itertools.permutations(expr_symbol_set, len(symbol_set))]
+                                   itertools.permutations(ex_symbol_set, len(symbol_set))]
 
-        checked_expr = set()
+        checked_ex = set()
 
         for combination in combinations_of_symbols:
             replace_dict = dict()
             for e, r in combination:
                 replace_dict[r] = e
-            new_expr = Rule.normalize_constant_in_expr(rule.xreplace(replace_dict))
-            if checked_expr.__contains__(new_expr):
+            new_ex = Rule.normalize_constant_in_expr(rule.xreplace(replace_dict))
+            if checked_ex.__contains__(new_ex):
                 continue
-            checked_expr.add(new_expr)
-            # print('new expr', new_expr, 'has', expr.has(new_expr))
-            normal_expr = Rule.normalize_duplicate_in_expr(new_expr)
-            if new_expr.func is rule.func and new_expr == normal_expr \
-                    and new_expr.args.__len__() == rule.args.__len__() and expr.has(new_expr):
-                right_expr = equal_rule.xreplace(replace_dict)
-                rules.append((new_expr, right_expr))
+            checked_ex.add(new_ex)
+            # print('new expr', new_ex, 'has', ex.has(new_ex))
+            normal_ex = Rule.normalize_duplicate_in_expr(new_ex)
+            if new_ex.func is rule.func and new_ex == normal_ex \
+                    and new_ex.args.__len__() == rule.args.__len__() and ex.has(new_ex):
+                right_ex = equal_rule.xreplace(replace_dict)
+                rules.append((new_ex, right_ex))
 
         return rules
 
@@ -84,21 +98,21 @@ class Rule:
     def convert_string_to_rule(string: str) -> (BooleanFunction, BooleanFunction):
         rule_strings = string.split("=")
 
-        left_rule_expr = parse_expr(rule_strings[0])
-        right_rule_expr = parse_expr(rule_strings[1])
-        return left_rule_expr, right_rule_expr
+        left_rule_ex = parse_expr(rule_strings[0])
+        right_rule_ex = parse_expr(rule_strings[1])
+        return left_rule_ex, right_rule_ex
 
     @staticmethod
-    def symbols_from_expression(expr: BooleanFunction) -> {Symbol}:
-        results = set([x for x in postorder_traversal(expr) if x.func is Symbol])
+    def symbols_from_expression(ex: BooleanFunction) -> {Symbol}:
+        results = set([x for x in postorder_traversal(ex) if x.func is Symbol])
         return results
 
     @staticmethod
-    def normalize_constant_in_expr(expr: BooleanFunction):
+    def normalize_constant_in_expr(ex: BooleanFunction):
 
         has_true = False
         has_false = False
-        args = list(expr.args)
+        args = list(ex.args)
         for i in range(len(args) - 1, -1, -1):
             if args[i] is true:
                 if has_true:
@@ -111,57 +125,57 @@ class Rule:
                 else:
                     has_false = True
 
-        return expr.func(*args)
+        return ex.func(*args)
 
     @staticmethod
-    def normalize_duplicate_in_expr(expr: BooleanFunction):
-        args = set(expr.args)
-        return expr.func(*args)
+    def normalize_duplicate_in_expr(ex: BooleanFunction):
+        args = set(ex.args)
+        return ex.func(*args)
 
     @staticmethod
-    def rule_replace(expr: BooleanFunction, rule):
-        if not expr.has(rule[0]):
-            return expr, False
+    def rule_replace(ex: BooleanFunction, rule):
+        if not ex.has(rule[0]):
+            return ex, False
 
-        result = Rule._rule_replace(expr, rule)
+        result = Rule._rule_replace(ex, rule)
         if result or result == false:
             return result, True
         else:
             args = []
             changed = False
 
-            for a in expr.args:
+            for a in ex.args:
                 a_xr = Rule.rule_replace(a, rule)
                 args.append(a_xr[0])
                 changed |= a_xr[1]
             args = tuple(args)
             if changed:
-                return expr.func(*args), True
+                return ex.func(*args), True
 
-        return expr, False
+        return ex, False
 
     # @staticmethod
-    # def _has(expr: BooleanFunction, pattern: BooleanFunction) -> bool:
+    # def _has(ex: BooleanFunction, pattern: BooleanFunction) -> bool:
     #     def match(ex: BooleanFunction, other: BooleanFunction):
     #         return ex == other and ex.args.__len__() == other.args.__len__()
-    #     return any(match(pattern, arg) for arg in preorder_traversal(expr))
+    #     return any(match(pattern, arg) for arg in preorder_traversal(ex))
 
     @staticmethod
-    def generate_sub_expr(expr: BooleanFunction) -> set:
-        expr_symbol_set = set(expr.atoms(Symbol))
+    def generate_sub_expr(ex: BooleanFunction) -> set:
+        ex_symbol_set = set(ex.atoms(Symbol))
 
-        for x in preorder_traversal(expr):
+        for x in preorder_traversal(ex):
             if x.func is not Symbol:
-                if not x == expr:
-                    expr_symbol_set.add(x)
+                if not x == ex:
+                    ex_symbol_set.add(x)
                 sym_set = set(x.args)
                 length = 2
                 while length < sym_set.__len__():
                     for sym_list in itertools.permutations(sym_set, length):
-                        expr_symbol_set.add(x.func(*sym_list))
+                        ex_symbol_set.add(x.func(*sym_list))
                     length += 1
 
-        return expr_symbol_set.difference({true, false})
+        return ex_symbol_set.difference({true, false})
 
     @staticmethod
     def _rule_replace(e, rule):
@@ -181,10 +195,10 @@ class Rule:
                     args[i] = rule[1]
                     return e.func(*args)
         # Nếu không thay thế theo một tham số được thì phải thay theo nhiều tham số
-        expr_args = set(e.args)
+        ex_args = set(e.args)
         rule_left_args = set(rule[0].args)
-        if expr_args.intersection(rule_left_args) == rule_left_args:
-            args = list(expr_args.difference(rule_left_args))
+        if ex_args.intersection(rule_left_args) == rule_left_args:
+            args = list(ex_args.difference(rule_left_args))
             args.append(rule[1])
             return e.func(*args)
 

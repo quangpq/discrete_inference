@@ -61,19 +61,19 @@
       "rule": "p | (p & q) = p"
     },
     {
-      "name": "Identity Theorems",
+      "name": "Luật phân phối và hấp thụ",
       "rule": "p | (~p & q) = p | q"
     },
     {
-      "name": "Identity Theorems",
+      "name": "Luật phân phối và hấp thụ",
       "rule": "~p | (p & q) = ~p | q"
     },
     {
-      "name": "Identity Theorems",
+      "name": "Luật phân phối và hấp thụ",
       "rule": "p & (~p | q) = p & q"
     },
     {
-      "name": "Identity Theorems",
+      "name": "Luật phân phối và hấp thụ",
       "rule": "~p & (p | q) = ~p & q"
     },
     {
