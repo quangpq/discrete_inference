@@ -18,68 +18,68 @@ class Reduce:
         min_ex = g
         temp_ex = g
         old_ex_set = {g}
-        rules_13 = rules_1 # + rules_3
+        rules_13 = rules_1  # + rules_3
 
-        def step_2(ex, ex_set):
+        def step_2(_ex, ex_set):
             print("STEP 2")
             found_result = False
             found_ex = None
             found_rule = None
-            for r in rules_2:
-                temp_rules = Reduce.apply_equal_rule(ex, r)
-                for temp_r in temp_rules:
+            for _rule in rules_2:
+                _temp_rules = Reduce.apply_equal_rule(_ex, _rule)
+                for _temp_rule in temp_rules:
                     # print("temp_r", temp_r)
-                    h, new_rule = Rule.rule_replace(ex, temp_r)
-                    if new_rule and not ex_set.__contains__(h):
+                    _h, _new_rule = Rule.rule_replace(_ex, _temp_rule)
+                    if _new_rule and not ex_set.__contains__(_h):
                         found_result = True
-                        found_ex = h
-                        found_rule = r
-                        print("r", r)
-                        print("h", h)
+                        found_ex = _h
+                        found_rule = _rule
+                        print("r", _rule)
+                        print("h", _h)
                         print("found")
                         break
                 if found_result:
                     break
             return found_result, found_ex, found_rule
 
-        def step_3(ex, ex_set):
+        def step_3(_ex, ex_set):
             print("STEP 3")
             found_result = False
             found_ex = None
             found_rule = None
-            for r in rules_13:
-                # print("r", r)
-                temp_rules = Reduce.apply_equal_rule(ex, r)
-                for temp_r in temp_rules:
+            for _rule in rules_13:
+                # print("r", _rule)
+                _temp_rules = Reduce.apply_equal_rule(_ex, _rule)
+                for _temp_rule in temp_rules:
                     # print("temp_r", temp_r)
-                    h, new_rule = Rule.rule_replace(ex, temp_r)
+                    _h, _new_rule = Rule.rule_replace(_ex, _temp_rule)
                     # print("h", h)
-                    if new_rule and not ex_set.__contains__(h) and Reduce.simpler(h, ex):
+                    if _new_rule and not ex_set.__contains__(_h) and Reduce.simpler(_h, _ex):
                         print("found")
                         if found_result:
-                            if Reduce.k_degree(found_ex) > Reduce.k_degree(h):
+                            if Reduce.k_degree(found_ex) > Reduce.k_degree(_h):
                                 print("choose better rule")
-                                found_ex = h
-                                found_rule = r
+                                found_ex = _h
+                                found_rule = _rule
                         else:
                             found_result = True
-                            found_ex = h
-                            found_rule = r
-                        print("r", r)
-                        print("h", h)
+                            found_ex = _h
+                            found_rule = _rule
+                        print("r", _rule)
+                        print("h", _h)
                         break
                 if found_result:
                     break
             return found_result, found_ex, found_rule
 
-        def step_4(min_ex, temp_ex, ex_list, rule_list):
-            if min_ex == temp_ex:
-                return ex_list, rule_list
-            if min_ex in ex_list:
-                i = ex_list.index(min_ex)
-                return ex_list[0:i + 1], rule_list[0:i + 1]
+        def step_4(min_expr, temp_expr, expr_list, rule_list):
+            if min_expr == temp_expr:
+                return expr_list, rule_list
+            if min_expr in expr_list:
+                i = expr_list.index(min_expr)
+                return expr_list[0:i + 1], rule_list[0:i + 1]
             else:
-                return ex_list, rule_list
+                return expr_list, rule_list
 
         # Step 1
         found = True
@@ -138,7 +138,7 @@ class Reduce:
         found = True
         while found and Reduce.k_degree(temp_ex) > 0:
             found, f_ex, f_rule = step_3(temp_ex, old_ex_set)
-            if (f_ex or f_ex is false) and f_rule:
+            if f_ex is not None and f_rule:
                 rules.append(f_rule)
                 ex_list.append(f_ex)
                 old_ex_set.add(f_ex)
@@ -160,31 +160,31 @@ class Reduce:
 
     @staticmethod
     def k_degree(ex: BooleanFunction) -> int:
-        args = [arg for arg in postorder_traversal(ex) if
-                arg.func is Symbol or arg.func is BooleanFalse or arg.func is BooleanTrue]
+        args = [ag for ag in postorder_traversal(ex) if
+                ag.func is Symbol or ag.func is BooleanFalse or ag.func is BooleanTrue]
 
-        not_count = [arg for arg in postorder_traversal(ex) if arg.func is Not].__len__()
+        not_count = [ag for ag in postorder_traversal(ex) if ag.func is Not].__len__()
 
         args_count = args.__len__()
 
-        removed_constant_list = [arg for arg in args if arg.func is Symbol]
+        removed_constant_list = [ag for ag in args if ag.func is Symbol]
         args_set_count = set(removed_constant_list).__len__()
         return args_count - args_set_count + not_count
 
     @staticmethod
     def simple_degree(ex: BooleanFunction) -> int:
-        def height(ex: BooleanFunction) -> int:
-            sub_ex = [arg for arg in ex.args if
-                        arg.func is not Symbol and arg.func is not BooleanFalse and arg.func is not BooleanTrue]
+        def height(_ex: BooleanFunction) -> int:
+            sub_ex = [ag for ag in _ex.args if
+                      ag.func is not Symbol and ag.func is not BooleanFalse and ag.func is not BooleanTrue]
             if sub_ex.__len__() == 0:
                 return 1
             else:
-                return max([height(ex) for ex in sub_ex]) + 1
+                return max([height(_ex) for _ex in sub_ex]) + 1
 
-        def length(ex) -> int:
+        def length(_ex) -> int:
             count = 0
-            for arg in postorder_traversal(ex):
-                if arg.func is Symbol or arg.func is BooleanFalse or arg.func is BooleanTrue or arg.func is Not:
+            for ag in postorder_traversal(_ex):
+                if ag.func is Symbol or ag.func is BooleanFalse or ag.func is BooleanTrue or ag.func is Not:
                     count += 1
 
             return count
@@ -204,4 +204,3 @@ class Reduce:
         # rules.extend(Reduce.apply_rule(ex, right_rule_ex, left_rule_ex))
 
         return rules
-

@@ -138,7 +138,7 @@ class Rule:
             return ex, False
 
         result = Rule._rule_replace(ex, rule)
-        if result or result == false:
+        if result is not None:
             return result, True
         else:
             args = []
