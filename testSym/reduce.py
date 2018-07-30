@@ -27,7 +27,7 @@ class Reduce:
             found_rule = None
             for _rule in rules_2:
                 _temp_rules = Reduce.apply_equal_rule(_ex, _rule)
-                for _temp_rule in temp_rules:
+                for _temp_rule in _temp_rules:
                     # print("temp_r", temp_r)
                     _h, _new_rule = Rule.rule_replace(_ex, _temp_rule)
                     if _new_rule and not ex_set.__contains__(_h):
@@ -50,7 +50,7 @@ class Reduce:
             for _rule in rules_13:
                 # print("r", _rule)
                 _temp_rules = Reduce.apply_equal_rule(_ex, _rule)
-                for _temp_rule in temp_rules:
+                for _temp_rule in _temp_rules:
                     # print("temp_r", temp_r)
                     _h, _new_rule = Rule.rule_replace(_ex, _temp_rule)
                     # print("h", h)
@@ -156,6 +156,138 @@ class Reduce:
                     temp_ex = f_ex
 
         ex_list, rules = step_4(min_ex, temp_ex, ex_list, rules)
+        return min_ex, rules, ex_list
+
+    @staticmethod
+    def reduce_2_expr_string(ex_str: str):
+        ex = parse_expr(ex_str)
+        return Reduce.reduce_2(ex)
+
+    @staticmethod
+    def reduce_2(ex: BooleanFunction):
+
+        def find_rules(_ex, rules_list, find_all=True):
+            nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
+            new_ex_count = 0
+
+            for _rule in rules_list:
+                found_result = False
+                found_ex = None
+                found_rule = None
+
+                # print("r", _rule)
+                _temp_rules = Reduce.apply_equal_rule(_ex, _rule)
+                for _temp_rule in _temp_rules:
+                    # print("temp_r", temp_r)
+                    _h, _new_rule = Rule.rule_replace(_ex, _temp_rule)
+                    # print("h", h)
+                    if _new_rule and not old_ex_set.__contains__(_h):
+                        if found_result:
+                            if set(found_ex.atoms(Symbol)).__len__() > set(_h.atoms(Symbol)).__len__():
+                                # Trong một luật, chọn ra các tạo biểu thức ngắn nhất
+                                found_ex = _h
+                                found_rule = _rule
+                        else:
+                            found_result = True
+                            found_ex = _h
+                            found_rule = _rule
+
+                if found_result:
+                    print("found_rule", found_rule)
+                    pprint(found_ex)
+
+                    rules.append(found_rule)
+                    ex_list.append(found_ex)
+                    old_ex_set.add(found_ex)
+                    temp_ex = found_ex
+                    _ex = found_ex
+                    if Reduce.simpler(found_ex, min_ex):
+                        min_ex = found_ex
+                    new_ex_count += 1
+                    if not find_all:
+                        break
+
+            return new_ex_count > 0
+
+        def remove_useless_steps():
+            nonlocal ex_list, rules
+            if min_ex == temp_ex:
+                return
+            if min_ex in ex_list:
+                i = ex_list.index(min_ex)
+                ex_list = ex_list[0:i + 1]
+                rules = rules[0:i + 1]
+
+        # Step 0
+        all_groups = ["group_1", "group_2", "group_3", "group_4", "group_5", "group_6", "group_7"]
+        all_rules = Rule.read_rules_2("rules_2.json", all_groups)
+        rules_1 = all_rules[0]
+        rules_2 = all_rules[1]
+        rules_3 = all_rules[2]
+        rules_4 = all_rules[3]
+        rules_5 = all_rules[4]
+        rules_6 = all_rules[5]
+        rules_7 = all_rules[6]
+
+        g = ex
+        rules = []
+        ex_list = []
+        min_ex = g
+        temp_ex = g
+        old_ex_set = {g}
+
+        found = True
+
+        while found and Reduce.k_degree(temp_ex) > 0:
+            found = False
+
+            # Group 2
+            found_in_group_2 = temp_ex.atoms(Not).__len__() > 0 or temp_ex.atoms(
+                BooleanTrue).__len__() > 0 or temp_ex.atoms(
+                BooleanFalse).__len__() > 0
+            while found_in_group_2:
+                found_in_group_2 = find_rules(temp_ex, rules_2)
+                found_in_group_2 = found_in_group_2 and (temp_ex.atoms(Not).__len__() > 0 or temp_ex.atoms(
+                    BooleanTrue).__len__() > 0 or temp_ex.atoms(
+                    BooleanFalse).__len__() > 0)
+
+            found = found_in_group_2 or found
+            print('found in group 2', found)
+
+            # Group 1
+            while find_rules(temp_ex, rules_1):
+                found = True
+
+            print('found in group 1', found)
+
+            # Group 4
+            found_implies = False
+            implies_count = temp_ex.atoms(Implies).__len__()
+            while implies_count > 0:
+                found_implies = find_rules(temp_ex, rules_4) or found_implies
+                implies_count = temp_ex.atoms(Implies).__len__()
+
+            print('found in group 4', found_implies)
+
+            if found_implies:
+                found = True
+                while find_rules(temp_ex, rules_5):
+                    print('found in group 5')
+
+            # Group 3
+            while find_rules(temp_ex, rules_3):
+                found = True
+
+            print('found in group 3', found)
+
+            if found is False:
+                found = find_rules(temp_ex, rules_7, find_all=False) or found
+
+            if found is False:
+                found = find_rules(temp_ex, rules_6) or found
+
+        remove_useless_steps()
+
         return min_ex, rules, ex_list
 
     @staticmethod

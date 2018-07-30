@@ -3,7 +3,7 @@ from sympy import *
 from sympy.logic.boolalg import *
 from sympy.parsing.sympy_parser import *
 import itertools
-from sympy import sympify
+
 
 class Rule:
     @staticmethod
@@ -22,7 +22,7 @@ class Rule:
 
     @staticmethod
     def generate_rules(ex: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
-        rule_strings = 'p & (q | r) = (p & q) | (p & r)'.split("=")
+        rule_strings = 'p | p = p'.split("=")
 
         left_rule_ex = parse_expr(rule_strings[0])
         right_rule_ex = parse_expr(rule_strings[1])
@@ -47,8 +47,8 @@ class Rule:
         symbol_set = set(rule.atoms(Symbol)).difference(constant_set)
         ex_symbol_set = Rule.generate_sub_expr(ex)
 
-        combinations_of_symbols = [list(zip(x, symbol_set)) for x in
-                                   itertools.permutations(ex_symbol_set, len(symbol_set))]
+        combinations_of_symbols = (list(zip(x, symbol_set)) for x in
+                                   itertools.permutations(ex_symbol_set, len(symbol_set)))
 
         checked_ex = set()
 
@@ -57,14 +57,21 @@ class Rule:
             for e, r in combination:
                 replace_dict[r] = e
             new_ex = Rule.normalize_constant_in_expr(rule.xreplace(replace_dict))
+
             if checked_ex.__contains__(new_ex):
                 continue
             checked_ex.add(new_ex)
-            # print('new expr', new_ex, 'has', ex.has(new_ex))
-            normal_ex = Rule.normalize_duplicate_in_expr(new_ex)
-            if new_ex.func is rule.func and new_ex == normal_ex \
-                    and new_ex.args.__len__() == rule.args.__len__() and ex.has(new_ex):
+            # Nếu luật cần phần trùng thì không cần loại bỏ
+            if rule.args.__len__() > set(rule.args).__len__():
+                normal_ex = new_ex
+            else:
+                normal_ex = Rule.normalize_duplicate_in_expr(new_ex)
+            # print('new expr', new_ex, 'has', ex.has(new_ex), 'normal_ex', normal_ex)
+
+            if new_ex.func is rule.func and new_ex == normal_ex and ex.has(new_ex):
                 right_ex = equal_rule.xreplace(replace_dict)
+                # right_ex = Rule.normalize_double_not_in_expr(right_ex)
+
                 rules.append((new_ex, right_ex))
 
         return rules
@@ -93,6 +100,26 @@ class Rule:
                 rules_3.append((rule["name"], rule_left, rule_right))
 
         return rules_1, rules_2, rules_3
+
+    @staticmethod
+    def read_rules_2(file_name: str, groups: [str]):
+
+        def extract_group(name: str, _data):
+            _group = _data[name]
+            _rules = []
+            for _rule in _group:
+                _rule_left, _rule_right = Rule.convert_string_to_rule(_rule["rule"])
+                _rules.append((_rule["name"], _rule_left, _rule_right))
+            return _rules
+
+        rules = []
+
+        with open(file_name) as f:
+            data = json.load(f)
+            for g in groups:
+                rules.append(extract_group(g, data))
+
+        return rules
 
     @staticmethod
     def convert_string_to_rule(string: str) -> (BooleanFunction, BooleanFunction):
@@ -128,8 +155,26 @@ class Rule:
         return ex.func(*args)
 
     @staticmethod
+    def normalize_double_not_in_expr(ex: BooleanFunction):
+
+        if ex.atoms(Not).__len__() < 2:  # khong ton tai phu dinh cua phu dinh
+            return ex
+
+        arg_to_replace = list()
+
+        for ag in postorder_traversal(ex):
+            if ag.func is Not and ag.args[0].func is Not:
+                arg_to_replace.append((ag, ag.args[0].args[0]))
+
+        new_ex = ex
+        for ag, new_ag in arg_to_replace:
+            new_ex = new_ex.replace(ag, new_ag)
+
+        return new_ex
+
+    @staticmethod
     def normalize_duplicate_in_expr(ex: BooleanFunction):
-        args = set(ex.args)
+        args = list(dict.fromkeys(ex.args))  # cần quan tâm thứ tự
         return ex.func(*args)
 
     @staticmethod
@@ -195,6 +240,10 @@ class Rule:
                     args[i] = rule[1]
                     return e.func(*args)
         # Nếu không thay thế theo một tham số được thì phải thay theo nhiều tham số
+        # nhưng không áp dụng cho phép Not
+        if rule[0].func is Not:
+            return None
+
         ex_args = set(e.args)
         rule_left_args = set(rule[0].args)
         if ex_args.intersection(rule_left_args) == rule_left_args:
