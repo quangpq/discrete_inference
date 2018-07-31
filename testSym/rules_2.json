@@ -1,6 +1,32 @@
 {
   "group_1": [
     {
+      "name": "Luật về phần tử bù",
+      "rule": "p & ~p = S.false"
+    },
+    {
+      "name": "Luật về phần tử bù",
+      "rule": "p | ~p = S.true"
+    },
+    {
+      "name": "Luật thống trị",
+      "rule": "p & S.false = S.false"
+    },
+    {
+      "name": "Luật thống trị",
+      "rule": "p | S.true = S.true"
+    },
+    {
+      "name": "Luật trung hòa",
+      "rule": "p & S.true = p"
+    },
+    {
+      "name": "Luật trung hòa",
+      "rule": "p | S.false = p"
+    }
+  ],
+    "group_2": [
+    {
       "name": "Phủ định của phủ định",
       "rule": "~~p = p"
     },
@@ -29,32 +55,6 @@
       "rule": "(p & q) | (p & r) = p & (q | r)"
     }
   ],
-  "group_2": [
-    {
-      "name": "Luật về phần tử bù",
-      "rule": "p & ~p = S.false"
-    },
-    {
-      "name": "Luật về phần tử bù",
-      "rule": "p | ~p = S.true"
-    },
-    {
-      "name": "Luật thống trị",
-      "rule": "p & S.false = S.false"
-    },
-    {
-      "name": "Luật thống trị",
-      "rule": "p | S.true = S.true"
-    },
-    {
-      "name": "Luật trung hòa",
-      "rule": "p & S.true = p"
-    },
-    {
-      "name": "Luật trung hòa",
-      "rule": "p | S.false = p"
-    }
-  ],
   "group_3": [
     {
       "name": "Luật phân phối và hấp thụ",
@@ -80,10 +80,6 @@
     }
   ],
   "group_5": [
-    {
-      "name": "Luật kéo theo",
-      "rule": "~p >> q = p | q"
-    },
     {
       "name": "Phủ định của phủ định",
       "rule": "~~p = p"

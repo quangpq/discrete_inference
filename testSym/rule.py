@@ -74,6 +74,8 @@ class Rule:
 
                 rules.append((new_ex, right_ex))
 
+        rules = sorted(rules, key=lambda rul: set(rul[0].atoms(Symbol)).__len__())
+
         return rules
 
     @staticmethod

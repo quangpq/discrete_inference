@@ -169,28 +169,30 @@ class Reduce:
         def find_rules(_ex, rules_list, find_all=True):
             nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
             new_ex_count = 0
+            found_result = True
 
-            for _rule in rules_list:
+            while found_result:
                 found_result = False
                 found_ex = None
                 found_rule = None
 
-                # print("r", _rule)
-                _temp_rules = Reduce.apply_equal_rule(_ex, _rule)
-                for _temp_rule in _temp_rules:
-                    # print("temp_r", temp_r)
-                    _h, _new_rule = Rule.rule_replace(_ex, _temp_rule)
-                    # print("h", h)
-                    if _new_rule and not old_ex_set.__contains__(_h):
-                        if found_result:
-                            if set(found_ex.atoms(Symbol)).__len__() > set(_h.atoms(Symbol)).__len__():
-                                # Trong một luật, chọn ra các tạo biểu thức ngắn nhất
+                for _rule in rules_list:
+                    # print("r", _rule)
+                    _temp_rules = Reduce.apply_equal_rule(_ex, _rule)
+                    for _temp_rule in _temp_rules:
+                        # print("temp_r", temp_r)
+                        _h, _new_rule = Rule.rule_replace(_ex, _temp_rule)
+                        # print("h", h)
+                        if _new_rule and not old_ex_set.__contains__(_h):
+                            if found_result:
+                                if set(found_ex.atoms(Symbol)).__len__() > set(_h.atoms(Symbol)).__len__():
+                                    # Trong một luật, chọn ra các tạo biểu thức ngắn nhất
+                                    found_ex = _h
+                                    found_rule = _rule
+                            else:
+                                found_result = True
                                 found_ex = _h
                                 found_rule = _rule
-                        else:
-                            found_result = True
-                            found_ex = _h
-                            found_rule = _rule
 
                 if found_result:
                     print("found_rule", found_rule)
@@ -204,9 +206,10 @@ class Reduce:
                     if Reduce.simpler(found_ex, min_ex):
                         min_ex = found_ex
                     new_ex_count += 1
-                    if not find_all:
-                        break
-
+                    # if not find_all:
+                    #     break
+                if found_result and not find_all:
+                    break
             return new_ex_count > 0
 
         def remove_useless_steps():
@@ -241,24 +244,24 @@ class Reduce:
         while found and Reduce.k_degree(temp_ex) > 0:
             found = False
 
-            # Group 2
-            found_in_group_2 = temp_ex.atoms(Not).__len__() > 0 or temp_ex.atoms(
+            # Group 1
+            found_in_group_1 = temp_ex.atoms(Not).__len__() > 0 or temp_ex.atoms(
                 BooleanTrue).__len__() > 0 or temp_ex.atoms(
                 BooleanFalse).__len__() > 0
-            while found_in_group_2:
-                found_in_group_2 = find_rules(temp_ex, rules_2)
-                found_in_group_2 = found_in_group_2 and (temp_ex.atoms(Not).__len__() > 0 or temp_ex.atoms(
+            while found_in_group_1:
+                found_in_group_1 = find_rules(temp_ex, rules_1)
+                found_in_group_1 = found_in_group_1 and (temp_ex.atoms(Not).__len__() > 0 or temp_ex.atoms(
                     BooleanTrue).__len__() > 0 or temp_ex.atoms(
                     BooleanFalse).__len__() > 0)
 
-            found = found_in_group_2 or found
-            print('found in group 2', found)
+            found = found_in_group_1 or found
+            print('found in group 1', found)
 
-            # Group 1
-            while find_rules(temp_ex, rules_1):
+            # Group 2
+            while find_rules(temp_ex, rules_2):
                 found = True
 
-            print('found in group 1', found)
+            print('found in group 2', found)
 
             # Group 4
             found_implies = False

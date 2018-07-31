@@ -16,12 +16,14 @@ expr_str2 = '(¬p ∧ ¬q) ∨ ¬p ∨ ¬q'
 
 
 # print(Reduce.simpler(expr2, expr))
-expr_str = '((p >> q) & (q >> r)) >> (p >> r)'  # True
+# expr_str = '((p >> q) & (q >> r)) >> (p >> r)'  # True
 # expr_str = '~(p | q) | ((~p & q)| ~q)'  # ¬(q ∧ p)
 # expr_str = '~(p | ~(p & q))'
 # expr_str = 'm & (n | p) & (~m | ~n | p)'  # m ∧ p
 # expr_str = '((a >> c) >> (b >> c)) >> (a & b)'  # b ∧ (a ∨ ¬c)
-#
+# expr_str = '(p & (p >> (r & q)) & (r >> (s | t)) & ~s) >> t'  # true
+expr_str = '((p | q) & (p >> r) & (q >> r)) >> r'  # true
+
 min_ex, rules, expr_list = Reduce.reduce_2_expr_string(expr_str)
 print("-------------------")
 pprint(min_ex)
