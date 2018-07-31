@@ -22,7 +22,7 @@ class Rule:
 
     @staticmethod
     def generate_rules(ex: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
-        rule_strings = 'p | p = p'.split("=")
+        rule_strings = 'p | true = true'.split("=")
 
         left_rule_ex = parse_expr(rule_strings[0])
         right_rule_ex = parse_expr(rule_strings[1])
@@ -56,11 +56,9 @@ class Rule:
             replace_dict = dict()
             for e, r in combination:
                 replace_dict[r] = e
+            # print('replace_dict', replace_dict)
             new_ex = Rule.normalize_constant_in_expr(rule.xreplace(replace_dict))
 
-            if checked_ex.__contains__(new_ex):
-                continue
-            checked_ex.add(new_ex)
             # Nếu luật cần phần trùng thì không cần loại bỏ
             if rule.args.__len__() > set(rule.args).__len__():
                 normal_ex = new_ex
@@ -70,6 +68,9 @@ class Rule:
 
             if new_ex.func is rule.func and new_ex == normal_ex and ex.has(new_ex):
                 right_ex = equal_rule.xreplace(replace_dict)
+                if checked_ex.__contains__((new_ex, right_ex)):
+                    continue
+                checked_ex.add((new_ex, right_ex))
                 # right_ex = Rule.normalize_double_not_in_expr(right_ex)
 
                 rules.append((new_ex, right_ex))
@@ -208,21 +209,34 @@ class Rule:
     #     return any(match(pattern, arg) for arg in preorder_traversal(ex))
 
     @staticmethod
-    def generate_sub_expr(ex: BooleanFunction) -> set:
+    def generate_sub_expr(ex: BooleanFunction) -> list:
         ex_symbol_set = set(ex.atoms(Symbol))
-
         for x in preorder_traversal(ex):
             if x.func is not Symbol:
                 if not x == ex:
                     ex_symbol_set.add(x)
-                sym_set = set(x.args)
-                length = 2
-                while length < sym_set.__len__():
-                    for sym_list in itertools.permutations(sym_set, length):
-                        ex_symbol_set.add(x.func(*sym_list))
-                    length += 1
+                arg_list = list(
+                    filter(lambda e: e.func is not BooleanFalse and e.func is not BooleanTrue, list(x.args)))
 
-        return ex_symbol_set.difference({true, false})
+                if arg_list.__len__() < 1:
+                    continue
+
+                ex_with_out_const = x.func(*arg_list)
+                if not ex_with_out_const == ex:
+                    ex_symbol_set.add(ex_with_out_const)
+
+                if x.func is Implies:
+                    for sym_list in itertools.combinations(arg_list, 2):
+                        ex_symbol_set.add(x.func(*sym_list))
+                else:
+                    length = 1
+                    while length < arg_list.__len__():
+                        for sym_list in itertools.combinations(arg_list, length):
+                            ex_symbol_set.add(x.func(*sym_list))
+                        length += 1
+
+        ex_symbol_set = ex_symbol_set.difference({true, false})
+        return sorted(ex_symbol_set, key=lambda e: set(e.atoms(Symbol)))
 
     @staticmethod
     def _rule_replace(e, rule):
@@ -240,7 +254,7 @@ class Rule:
                     args = list(e.args)
                     i = args.index(a)
                     args[i] = rule[1]
-                    return e.func(*args)
+                    return Rule.normalize_constant_in_expr(e.func(*args))
         # Nếu không thay thế theo một tham số được thì phải thay theo nhiều tham số
         # nhưng không áp dụng cho phép Not
         if rule[0].func is Not:
@@ -251,6 +265,6 @@ class Rule:
         if ex_args.intersection(rule_left_args) == rule_left_args:
             args = list(ex_args.difference(rule_left_args))
             args.append(rule[1])
-            return e.func(*args)
+            return Rule.normalize_constant_in_expr(e.func(*args))
 
         return None
