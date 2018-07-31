@@ -22,7 +22,7 @@ class Rule:
 
     @staticmethod
     def generate_rules(ex: BooleanFunction) -> [(BooleanFunction, BooleanFunction)]:
-        rule_strings = 'p | true = true'.split("=")
+        rule_strings = 'p | p = p'.split("=")
 
         left_rule_ex = parse_expr(rule_strings[0])
         right_rule_ex = parse_expr(rule_strings[1])
@@ -260,9 +260,21 @@ class Rule:
         if rule[0].func is Not:
             return None
 
+        def is_in(_expr: BooleanFunction):
+            if _expr == e:
+                return True
+            elif _expr.func is e.func:
+                _permutations = itertools.permutations(e.args, len(_expr.args))
+                for _permutation in _permutations:
+                    new_expr = e.func(*_permutation)
+                    if new_expr == _expr:
+                        return True
+
+            return False
+
         ex_args = set(e.args)
         rule_left_args = set(rule[0].args)
-        if ex_args.intersection(rule_left_args) == rule_left_args:
+        if is_in(rule[0]):
             args = list(ex_args.difference(rule_left_args))
             args.append(rule[1])
             return Rule.normalize_constant_in_expr(e.func(*args))
