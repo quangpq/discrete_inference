@@ -5,16 +5,17 @@ from expr_tree import simple_degree
 
 # expr_str2 = 's | t | (True) | ~p | ~q'
 # expr_str2 = '(¬p ∧ ¬q) ∨ ¬p ∨ ¬q'
-expr_str2 = '~(p & (~p | (r & q)) & (~r | t | t) & ~s) | t'
+# expr_str2 = '~(p & (~p | (r & q)) & (~r | t | t) & ~s) | t'
 # expr_str2 = ' (~r | t | t | t) & (t | r)'
 # expr_str2 = '~(~r | q | p | z)'
+expr_str2 = '(s | (p & ~r)) & (~p | ~p | ~s) & (r | ~p | ~q)'
 # coms = Rule.generate_sub_expr(expr)
 # print(coms)
 # #
-rules, ex_list = Rule.find_all_rules_of_expr_str(expr_str2)
-for rule, _ex in zip(rules, ex_list):
-    print("rule:", rule)
-    pprint(_ex)
+# rules, ex_list = Rule.find_all_rules_of_expr_str(expr_str2)
+# for rule, _ex in zip(rules, ex_list):
+#     print("rule:", rule)
+#     pprint(_ex)
 #
 # print(min(ex_list, key=lambda e: simple_degree(e)))
 
@@ -47,14 +48,17 @@ for rule, _ex in zip(rules, ex_list):
 # expr_str = '~(p | ~(p & q))'  # 0
 # expr_str = 'p & (~p | q) | (~(~(z | ~q)))'  # p ∨ z ∨ ¬q
 # expr_str = '(p & r) | ((p | s) & (p | a))'  # p ∨ (a ∧ s)
-expr_str = '(p | (p & y)) >> ((p & q) & (r & ~p))'
+# expr_str = '(p | (p & y)) >> ((p & q) & (r & ~p))'
+expr_str = '(p >> ((~q | r) & ~s)) & (~s >> (~r & p))'
+# expr_str = '~(x & (y | z) & (~x | ~y | z))'  # ¬(x ∧ z)
+# expr_str = '~((x & y) >> z)'
+# expr_str = '~(x | y | (~x & ~y & z))'  # ¬(x ∨ y ∨ z)
 
 
-
-# min_ex, rules, expr_list = Reduce.reduce_2_expr_string(expr_str)
-# print("-------------------")
-# pprint(min_ex)
-# print("-------------------")
-# for ex, r in zip(expr_list, rules):
-#     print(r)
-#     pprint(ex)
+min_ex, rules, expr_list = Reduce.reduce_2_expr_string(expr_str)
+print("-------------------")
+pprint(min_ex)
+print("-------------------")
+for ex, r in zip(expr_list, rules):
+    print(r)
+    pprint(ex)

@@ -1,5 +1,6 @@
 from rule import *
 from expr_tree import *
+from typing import Optional, Set
 
 
 class Reduce:
@@ -167,6 +168,19 @@ class Reduce:
     @staticmethod
     def reduce_2(ex: BooleanFunction):
 
+        def apply_found_rule(_ex, _rule):
+            nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
+
+            print("found_rule", _rule)
+            pprint(_ex)
+
+            rules.append(_rule)
+            ex_list.append(_ex)
+            old_ex_set.add(_ex)
+            temp_ex = _ex
+            if simpler(_ex, min_ex):
+                min_ex = _ex
+
         def find_rules(_ex, rules_list, find_all=True):
             nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
             new_ex_count = 0
@@ -187,7 +201,8 @@ class Reduce:
                         # print("h", h)
                         if _new_rule and not old_ex_set.__contains__(_h):
                             if found_result:
-                                if simple_degree(found_ex) > simple_degree(_h):
+                                if find_all and simple_degree(found_ex) > simple_degree(
+                                        _h) or not find_all and simple_degree(found_ex) < simple_degree(_h):
                                     # Trong một luật, chọn ra các tạo biểu thức ngắn nhất
                                     found_ex = _h
                                     found_rule = _rule
@@ -197,22 +212,75 @@ class Reduce:
                                 found_rule = _rule
 
                 if found_result:
-                    print("found_rule", found_rule)
-                    pprint(found_ex)
-
-                    rules.append(found_rule)
-                    ex_list.append(found_ex)
-                    old_ex_set.add(found_ex)
-                    temp_ex = found_ex
+                    apply_found_rule(found_ex, found_rule)
                     _ex = found_ex
-                    if simpler(found_ex, min_ex):
-                        min_ex = found_ex
                     new_ex_count += 1
-                    # if not find_all:
-                    #     break
+
                 if found_result and not find_all:
                     break
             return new_ex_count > 0
+
+        def distribute_rules(_ex):
+            nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
+            found_result = False
+            found_ex = None
+            found_rule = ('Luật phân phối', None, None)
+
+            def valid_expr(_expr: BooleanFunction):
+                if _expr.func is Or:
+                    return len([sub_ag for sub_ag in ag.args if sub_ag.func is And])
+                elif _expr.func is And:
+                    return len([sub_ag for sub_ag in ag.args if sub_ag.func is Or])
+                return 0
+
+            for ag in preorder_traversal(_ex):
+                valid_count = valid_expr(ag)
+                if valid_count > 0:
+                    if valid_count == 1:
+                        _h = Reduce.distributive_law(_ex, ag)
+                    elif valid_count == 2 and ag.args.__len__() == 2:
+                        _h = Reduce.distributive_law_2_args(_ex, ag)
+                    else:
+                        continue
+
+                    if _h is not None and not old_ex_set.__contains__(_h):
+                        if found_result:
+                            if simple_degree(_h) > simple_degree(found_ex):
+                                found_ex = _h
+                        else:
+                            found_result = True
+                            found_ex = _h
+
+            if found_result:
+                apply_found_rule(found_ex, found_rule)
+
+            return found_result
+
+        def de_morgan_rules(_ex):
+            nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
+            found_result = False
+            found_ex = None
+            found_rule = ('Luật De Morgan', None, None)
+
+            def valid_expr(_expr: BooleanFunction):
+                return _expr.func is Not and (_expr.args[0].func is And or _expr.args[0].func is Or)
+
+            for ag in preorder_traversal(_ex):
+                if valid_expr(ag):
+                    _h = Reduce.de_morgan_law(_ex, ag)
+
+                    if _h is not None and not old_ex_set.__contains__(_h):
+                        if found_result:
+                            if simple_degree(_h) < simple_degree(found_ex):
+                                found_ex = _h
+                        else:
+                            found_result = True
+                            found_ex = _h
+
+            if found_result:
+                apply_found_rule(found_ex, found_rule)
+
+            return found_result
 
         def remove_useless_steps():
             nonlocal ex_list, rules
@@ -224,7 +292,7 @@ class Reduce:
                 rules = rules[0:i + 1]
 
         # Step 0
-        all_groups = ["group_1", "group_2", "group_3", "group_4", "group_5", "group_6", "group_7"]
+        all_groups = ["group_1", "group_2", "group_3", "group_4", "group_5", "group_6", "group_7", "group_2_1"]
         all_rules = Rule.read_rules_2("rules_2.json", all_groups)
         rules_1 = all_rules[0]
         rules_2 = all_rules[1]
@@ -233,6 +301,7 @@ class Reduce:
         rules_5 = all_rules[4]
         rules_6 = all_rules[5]
         rules_7 = all_rules[6]
+        rules_2_1 = all_rules[7]
 
         g = ex
         rules = []
@@ -243,6 +312,7 @@ class Reduce:
 
         found = True
         distribution_count = 0
+        found_distribution = False
 
         while found and k_degree(temp_ex) > 0:
             found = False
@@ -266,6 +336,13 @@ class Reduce:
 
             print('found in group 2', found)
 
+            # Group 2.1
+            if not found_distribution:
+                while find_rules(temp_ex, rules_2_1):
+                    found = True
+
+            print('found in group 2.1', found)
+
             # Group 4
             found_implies = False
             implies_count = temp_ex.atoms(Implies).__len__()
@@ -275,6 +352,7 @@ class Reduce:
 
             print('found in group 4', found_implies)
 
+            # Group 5
             if found_implies:
                 found = True
                 while find_rules(temp_ex, rules_5):
@@ -286,17 +364,16 @@ class Reduce:
 
             print('found in group 3', found)
 
-            if found is False:
-                found = find_rules(temp_ex, rules_6, find_all=False) or found
+            if found is False and distribution_count < 5:
+                found_distribution = distribute_rules(temp_ex)
+                found = found_distribution or found
+                if found:
+                    distribution_count += 1
+            else:
+                found_distribution = False
 
-            if found is False and distribution_count < 3:
-                found = find_rules(temp_ex, rules_7) or found
-            #     if found:
-            #         distribution_count += 1
-            #     else:
-            #         distribution_count = 0
-            # else:
-            #     distribution_count = 0
+            if found is False:
+                found = de_morgan_rules(temp_ex) or found
 
         remove_useless_steps()
 
@@ -311,3 +388,71 @@ class Reduce:
         # rules.extend(Reduce.apply_rule(ex, right_rule_ex, left_rule_ex))
 
         return rules
+
+    @staticmethod
+    def de_morgan_law(ex: BooleanFunction, ag: BooleanFunction) -> BooleanFunction:
+        func = And if ag.args[0].func is Or else Or
+        args = ag.args[0].args
+        new_arg = list(map(lambda sub_arg: Not(sub_arg), list(args)))
+        return ex.xreplace({ag, func(*new_arg)})
+
+    @staticmethod
+    def distributive_law(ex: BooleanFunction, ag: BooleanFunction) -> BooleanFunction:
+        args = list(ag.args)
+        func = And if ag.func is Or else Or
+
+        small_args = args
+        big_args = max([x for x in ag.args if x.func is func], key=lambda x: x.args.__len__())
+        small_args.remove(big_args)
+
+        # tìm biểu thức trong small_args có phàn trùng lớn nhất với big_args
+        count = 0
+        best_args = small_args[0]
+        big_args_set = Reduce.normalise_args_set(set(big_args.args))
+        for a in small_args:
+            if a.func is Symbol:
+                count_a = 1 if big_args_set.__contains__(a) else 0
+            else:
+                set_a = Reduce.normalise_args_set(set(a.args))
+                count_a = (big_args_set.intersection(set_a)).__len__()
+
+            if count_a > count:
+                count = count_a
+                best_args = a
+
+        small_args.remove(best_args)
+
+        new_args = list(map(lambda x: ag.func(best_args, x), list(big_args.args)))
+        sub_expr = func(*new_args)
+        small_args.append(sub_expr)
+
+        return ex.xreplace({ag: ag.func(*small_args)})
+
+    @staticmethod
+    def distributive_law_2_args(ex: BooleanFunction, ag: BooleanFunction) -> Optional[BooleanFunction]:
+        if ag.args.__len__() != 2:
+            return None
+
+        left_args = list(ag.args[0].args)
+        right_args = list(ag.args[1].args)
+
+        if left_args.__len__() > 3 or right_args.__len__() > 3:
+            return None
+
+        func = And if ag.func is Or else Or
+
+        from itertools import product
+
+        sub_expr = [ag.func(lhs, rhs) for lhs, rhs in product(left_args, right_args)]
+
+        return ex.xreplace({ag: func(*sub_expr)})
+
+    @staticmethod
+    def normalise_args_set(s: Set[BooleanFunction]) -> Set[BooleanFunction]:
+        item_to_remove = set(item for item in s if item.func is Not)
+        s = s.difference(item_to_remove)
+        new_items = set()
+        for i in item_to_remove:
+            new_items = new_items.union(set(i.args))
+
+        return s.union(new_items)

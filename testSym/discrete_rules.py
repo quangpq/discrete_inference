@@ -140,7 +140,7 @@ class DiscreteRule:
         sub_expr = func(*new_args)
         small_args.append(sub_expr)
 
-        return ex.replace(ag, ag.func(*small_args))
+        return ex.xreplace({ag: ag.func(*small_args)})
 
     @staticmethod
     def revert_distributive_law(ex: BooleanFunction, ag: BooleanFunction) -> Optional[BooleanFunction]:

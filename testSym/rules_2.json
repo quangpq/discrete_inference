@@ -33,7 +33,7 @@
       "rule": "p | S.false = p"
     }
   ],
-    "group_2": [
+  "group_2": [
     {
       "name": "Phủ định của phủ định",
       "rule": "~~p = p"
@@ -53,7 +53,9 @@
     {
       "name": "Luật hấp thụ",
       "rule": "p | (p & q) = p"
-    },
+    }
+  ],
+  "group_2_1": [
     {
       "name": "Luật phân phối",
       "rule": "(p | q) & (p | r) = p | (q & r)"
@@ -147,7 +149,7 @@
       "rule": "p & (q | r) = (p & q) | (p & r)"
     }
   ],
-    "group_7": [
+  "group_7": [
     {
       "name": "Luật De Morgan",
       "rule": "~p | ~q = ~(p & q)"
