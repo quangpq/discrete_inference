@@ -59,10 +59,37 @@ expr_str2 = '(s | (p & ~r)) & (~p | ~p | ~s) & (r | ~p | ~q)'
 # expr_str = '((p >> q) & (q >> r)) >> (p >> r)'  # True
 # expr_str = '~(p | ~(p & q))'  # false
 
-min_ex, rules, expr_list = Reduce.reduce_2_expr_string(expr_str)
+# min_ex, rules, expr_list = Reduce.reduce_2_expr_string(expr_str)
+# print("-------------------")
+# pprint(min_ex)
+# print(rules.__len__())
+# print("-------------------")
+# for ex, r in zip(expr_list, rules):
+#     print(r)
+#     pprint(ex)
+
+# expr_str_1 = '(p >> (q >> (p & q & r)))'
+# expr_str_2 = 'q >> (p >> r)'
+
+expr_str_1 = '(p | q) & (~p | ~q)'
+expr_str_2 = '(p & ~q) | (~p & q)'
+
+result, step_1, step_2 = Reduce.equivalent_expr_string(expr_str_1, expr_str_2)
 print("-------------------")
-pprint(min_ex)
+print(result)
 print("-------------------")
-for ex, r in zip(expr_list, rules):
-    print(r)
-    pprint(ex)
+if step_1 is not None:
+    print("Cac luat cua bieu thuc")
+    ex1, rules_1, expr_list_1 = step_1
+    pprint(ex1)
+    for ex, r in zip(expr_list_1, rules_1):
+        print(r)
+        pprint(ex)
+print("-------------------")
+if step_2 is not None:
+    print("Cac luat cua bieu thuc")
+    ex2, rules_2, expr_list_2 = step_2
+    pprint(ex2)
+    for ex, r in zip(expr_list_2, rules_2):
+        print(r)
+        pprint(ex)

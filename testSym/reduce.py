@@ -166,7 +166,7 @@ class Reduce:
         return Reduce.reduce_2(ex)
 
     @staticmethod
-    def reduce_2(ex: BooleanFunction):
+    def reduce_2(ex: BooleanFunction, remove_implies=False):
 
         def apply_found_rule(_ex, _rule):
             nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
@@ -339,7 +339,7 @@ class Reduce:
         distribution_count = 0
         found_distribution = False
 
-        while found and k_degree(temp_ex) > 0:
+        while found and (k_degree(temp_ex) > 0 or (remove_implies and temp_ex.atoms(Implies).__len__() > 0)):
             found = False
 
             # Group 1
@@ -406,6 +406,33 @@ class Reduce:
         remove_useless_steps()
 
         return min_ex, rules, ex_list
+
+    @staticmethod
+    def equivalent_expr_string(ex_str_1: str, ex_str_2: str):
+        ex1 = parse_expr(ex_str_1)
+        ex2 = parse_expr(ex_str_2)
+        return Reduce.equivalent(ex1, ex2)
+
+    @staticmethod
+    def equivalent(ex1: BooleanFunction, ex2: BooleanFunction):
+
+        if ex1 == ex2:
+            return True, None, None
+
+        if simpler(ex1, ex2):
+            ex1, ex2 = ex2, ex1
+
+        min_ex1, rules_1, expr_list_1 = Reduce.reduce_2(ex1, remove_implies=True)
+
+        if expr_list_1[-1] == ex2:
+            return True, (ex1, rules_1, expr_list_1), None
+
+        min_ex2, rules_2, expr_list_2 = Reduce.reduce_2(ex2, remove_implies=True)
+
+        if expr_list_1[-1] == expr_list_2[-1]:
+            return True, (ex1, rules_1, expr_list_1), (ex2, rules_2, expr_list_2)
+
+        return False, None, None
 
     @staticmethod
     def apply_equal_rule(ex: BooleanFunction, rule):
