@@ -181,7 +181,7 @@ class Reduce:
             if simpler(_ex, min_ex):
                 min_ex = _ex
 
-        def find_rules(_ex, rules_list, find_all=True):
+        def find_rules(_ex, rules_list):
             nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
             new_ex_count = 0
             found_result = True
@@ -201,8 +201,7 @@ class Reduce:
                         # print("h", h)
                         if _new_rule and not old_ex_set.__contains__(_h):
                             if found_result:
-                                if find_all and simple_degree(found_ex) > simple_degree(
-                                        _h) or not find_all and simple_degree(found_ex) < simple_degree(_h):
+                                if simpler(_h, found_ex):
                                     # Trong một luật, chọn ra các tạo biểu thức ngắn nhất
                                     found_ex = _h
                                     found_rule = _rule
@@ -216,8 +215,6 @@ class Reduce:
                     _ex = found_ex
                     new_ex_count += 1
 
-                if found_result and not find_all:
-                    break
             return new_ex_count > 0
 
         def distribute_rules(_ex):
@@ -245,7 +242,7 @@ class Reduce:
 
                     if _h is not None and not old_ex_set.__contains__(_h):
                         if found_result:
-                            if simple_degree(_h) > simple_degree(found_ex):
+                            if simpler(found_ex, _h):
                                 found_ex = _h
                         else:
                             found_result = True
@@ -256,24 +253,52 @@ class Reduce:
 
             return found_result
 
-        def de_morgan_rules(_ex):
+        def de_morgan_expand_rules(_ex):
             nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
             found_result = False
             found_ex = None
-            found_rule = ('Luật De Morgan', None, None)
+            found_rule = ('Luật De Morgan', True, None)
 
             def valid_expr(_expr: BooleanFunction):
                 return _expr.func is Not and (_expr.args[0].func is And or _expr.args[0].func is Or)
 
             for ag in preorder_traversal(_ex):
                 if valid_expr(ag):
-                    _h = Reduce.de_morgan_law(_ex, ag)
+                    _h = Reduce.de_morgan_expand_law(_ex, ag)
 
                     if _h is not None and not old_ex_set.__contains__(_h):
                         if found_result:
-                            if simple_degree(_h) < simple_degree(found_ex):
+                            if simpler(found_ex, _h):
                                 found_ex = _h
                         else:
+                            found_result = True
+                            found_ex = _h
+
+            if found_result:
+                apply_found_rule(found_ex, found_rule)
+
+            return found_result
+
+        def de_morgan_reduce_rules(_ex):
+            nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
+            found_result = False
+            found_ex = None
+            found_rule = ('Luật De Morgan', False, None)
+
+            def valid_expr(_expr: BooleanFunction):
+                if _expr.func is not And and _expr.func is not Or:
+                    return False
+                return [sub_expr for sub_expr in _expr.args if sub_expr.func is Not].__len__() > 1
+
+            for ag in preorder_traversal(_ex):
+                if valid_expr(ag):
+                    _h = Reduce.de_morgan_reduce_law(_ex, ag)
+
+                    if _h is not None and not old_ex_set.__contains__(_h):
+                        if found_result:
+                            if simpler(_h, found_ex):
+                                found_ex = _h
+                        elif simpler(_h, min_ex):
                             found_result = True
                             found_ex = _h
 
@@ -364,6 +389,9 @@ class Reduce:
 
             print('found in group 3', found)
 
+            if found is False:
+                found = de_morgan_expand_rules(temp_ex) or found
+
             if found is False and distribution_count < 5:
                 found_distribution = distribute_rules(temp_ex)
                 found = found_distribution or found
@@ -373,7 +401,7 @@ class Reduce:
                 found_distribution = False
 
             if found is False:
-                found = de_morgan_rules(temp_ex) or found
+                found = de_morgan_reduce_rules(temp_ex) or found
 
         remove_useless_steps()
 
@@ -390,11 +418,26 @@ class Reduce:
         return rules
 
     @staticmethod
-    def de_morgan_law(ex: BooleanFunction, ag: BooleanFunction) -> BooleanFunction:
+    def de_morgan_expand_law(ex: BooleanFunction, ag: BooleanFunction) -> BooleanFunction:
         func = And if ag.args[0].func is Or else Or
         args = ag.args[0].args
         new_arg = list(map(lambda sub_arg: Not(sub_arg), list(args)))
-        return ex.xreplace({ag, func(*new_arg)})
+        return ex.xreplace({ag: func(*new_arg)})
+
+    @staticmethod
+    def de_morgan_reduce_law(ex: BooleanFunction, ag: BooleanFunction) -> BooleanFunction:
+        func = And if ag.func is Or else Or
+        not_args, other_args = sift(ag.args, lambda _arg: _arg.func is Not, binary=True)
+        not_args = list(map(lambda _arg: _arg.args[0], not_args))
+
+        new_not_expr = Not(func(*not_args))
+
+        if other_args.__len__() > 0:
+            new_expr = ag.func(new_not_expr, *other_args)
+        else:
+            new_expr = new_not_expr
+
+        return ex.xreplace({ag: new_expr})
 
     @staticmethod
     def distributive_law(ex: BooleanFunction, ag: BooleanFunction) -> BooleanFunction:

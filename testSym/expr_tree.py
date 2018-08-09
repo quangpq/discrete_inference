@@ -6,7 +6,7 @@ def k_degree(ex: BooleanFunction) -> int:
     args = [ag for ag in postorder_traversal(ex) if
             ag.func is Symbol or ag.func is BooleanFalse or ag.func is BooleanTrue]
 
-    not_count = [ag for ag in postorder_traversal(ex) if ag.func is Not].__len__()
+    not_count = ex.atoms(Not).__len__()
 
     args_count = args.__len__()
 
@@ -38,4 +38,4 @@ def simple_degree(ex: BooleanFunction) -> int:
 
 
 def simpler(ex_1: BooleanFunction, ex_2: BooleanFunction) -> bool:
-    return simple_degree(ex_1) <= simple_degree(ex_2)
+    return length_of_expr(ex_1) <= length_of_expr(ex_2) and height_of_expr(ex_1) <= height_of_expr(ex_2)

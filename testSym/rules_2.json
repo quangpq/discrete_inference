@@ -99,12 +99,32 @@
       "rule": "p | S.true = S.true"
     },
     {
+      "name": "Luật thống trị",
+      "rule": "p & S.false = S.false"
+    },
+    {
+      "name": "Luật lũy đẳng",
+      "rule": "p | p = p"
+    },
+    {
+      "name": "Luật lũy đẳng",
+      "rule": "p & p = p"
+    },
+    {
       "name": "Luật trung hòa",
       "rule": "p & S.true = p"
     },
     {
+      "name": "Luật trung hòa",
+      "rule": "p | S.false = p"
+    },
+    {
       "name": "Luật về phần tử bù",
       "rule": "p | ~p = S.true"
+    },
+    {
+      "name": "Luật về phần tử bù",
+      "rule": "p & ~p = S.false"
     },
     {
       "name": "Luật phân phối và hấp thụ",
@@ -139,14 +159,6 @@
     {
       "name": "Luật De Morgan",
       "rule": "~(p | q) = ~p & ~q"
-    },
-    {
-      "name": "Luật phân phối",
-      "rule": "p | (q & r) = (p | q) & (p | r)"
-    },
-    {
-      "name": "Luật phân phối",
-      "rule": "p & (q | r) = (p & q) | (p & r)"
     }
   ],
   "group_7": [
