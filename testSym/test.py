@@ -1,5 +1,6 @@
 from rule import *
 from reduce import *
+from logic_inference import *
 from expr_tree import simple_degree
 
 

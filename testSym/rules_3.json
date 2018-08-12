@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Quy tắc Modus Ponens",
+    "rule": "{p → q, p} ⟼ {q}"
+  },
+  {
+    "name": "Quy tắc Modus Tollens",
+    "rule": "{p → q, ¬q} ⟼ {¬p}"
+  },
+  {
+    "name": "Tam đoạn luận/Rule of Syllogism",
+    "rule": "{p → q, q → r} ⟼ {p → r}"
+  },
+  {
+    "name": "Tam đoạn luận rời/Disjunctive syllogism",
+    "rule": "{p ∨ q, ¬p} ⟼ { q }"
+  },
+  {
+    "name": "Quy tắc mâu thuẫn",
+    "rule": "{¬(p ∧ ¬q)} ⟼ {p → q}"
+  },
+  {
+    "name": "Quy tắc chứng minh theo trường hợp/Case analysis",
+    "rule": "{p → r , q → r, p ∨ q} ⟼ {r}"
+  },
+  {
+    "name": "Constructive dilemma",
+    "rule": "{p → r , q → t, p ∨ q} ⟼ {r ∨ t}"
+  },
+  {
+    "name": "Quy tắc đơn giản/Simplification",
+    "rule": "{p ∧ q} ⟼ {p, q}"
+  },
+  {
+    "name": "Constructing a Disjunction",
+    "rule": "{p, q} ⟼ {p ∨ q}"
+  },
+  {
+    "name": "Adjunction",
+    "rule": "{p, q} ⟼ {p ∧ q}"
+  },
+  {
+    "name": "Negation Introduction",
+    "rule": "p → q, p → ¬q} ⟼ {¬p}"
+  }
+]
