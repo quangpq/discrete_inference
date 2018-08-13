@@ -1,7 +1,7 @@
 from sympy import *
 from sympy.logic.boolalg import *
 from typing import Optional, Set, Dict, List
-from sympy.parsing.sympy_parser import *
+from parse import parse_expr
 import itertools
 
 InferenceRuleDict = Dict[BooleanFunction, List[BooleanFunction]]
@@ -384,33 +384,33 @@ class LogicInference:
         return new_facts
 
 
-# _facts = {parse_expr('p >> q'),
+# _facts = {parse_expr('p => q'),
 #           parse_expr('p'),
-#           parse_expr('~p >> r'),
+#           parse_expr('~p => r'),
 #           parse_expr('~p'),
-#           parse_expr('(b | c) >> a'),
+#           parse_expr('(b | c) => a'),
 #           parse_expr('b | c')}
 # _new_facts = LogicInference.modus_ponens_rule(_facts)
 
 # _facts = {
-#     parse_expr('p >> q'),
+#     parse_expr('p => q'),
 #     parse_expr('~q'),
-#     parse_expr('~p >> ~r'),
+#     parse_expr('~p => ~r'),
 #     parse_expr('r'),
-#     parse_expr('(b | c) >> a'),
+#     parse_expr('(b | c) => a'),
 #     parse_expr('a'),
-#     parse_expr('d >> (a & b)'),  # them de morgan
+#     parse_expr('d => (a & b)'),  # them de morgan
 #     parse_expr('~(a & b)')
 # }
 # _new_facts = LogicInference.modus_tollens_rule(_facts)
 
 # _facts = {
-#     parse_expr('p >> q'),
-#     parse_expr('q >> r'),
-#     parse_expr('(p | t) >> q'),
-#     parse_expr('q >> t'),
-#     parse_expr('(p | r) >> ~q'),
-#     parse_expr('~q >> t'),
+#     parse_expr('p => q'),
+#     parse_expr('q => r'),
+#     parse_expr('(p | t) => q'),
+#     parse_expr('q => t'),
+#     parse_expr('(p | r) => ~q'),
+#     parse_expr('~q => t'),
 # }
 # _new_facts = LogicInference.syllogism(_facts)
 
@@ -442,31 +442,31 @@ class LogicInference:
 # _new_facts = LogicInference.adjunctions(_facts)
 
 # _facts = {
-#     parse_expr('~p >> q'),
-#     parse_expr('~p >> ~q'),
-#     parse_expr('(p | t) >> q'),
-#     parse_expr('(p | t) >> ~q'),
-#     parse_expr('(p | r) >> ~q'),
-#     parse_expr('~q >> t'),
+#     parse_expr('~p => q'),
+#     parse_expr('~p => ~q'),
+#     parse_expr('(p | t) => q'),
+#     parse_expr('(p | t) => ~q'),
+#     parse_expr('(p | r) => ~q'),
+#     parse_expr('~q => t'),
 # }
 # _new_facts = LogicInference.negation_introduction(_facts)
 
 # _facts = {
-#     parse_expr('~p >> r'),
-#     parse_expr('q >> t'),
+#     parse_expr('~p => r'),
+#     parse_expr('q => t'),
 #     parse_expr('~p | q'),
-#     parse_expr('(p | t) >> z'),
-#     parse_expr('(p | r) >> z'),
+#     parse_expr('(p | t) => z'),
+#     parse_expr('(p | r) => z'),
 #     parse_expr('p | t | r'),
-#     parse_expr('a >> b'),
-#     parse_expr('c >> d'),
+#     parse_expr('a => b'),
+#     parse_expr('c => d'),
 #     parse_expr('a | c | g'),
 # }
 # _new_facts = LogicInference.case_analysis(_facts)
 
 # _facts = {
-#     parse_expr('~p >> r'),
-#     parse_expr('q >> t'),
+#     parse_expr('~p => r'),
+#     parse_expr('q => t'),
 #     parse_expr('~(p & ~q)'),
 #     parse_expr('~(p & r)'),
 #     parse_expr('~(a & c & ~s)'),
@@ -476,32 +476,40 @@ class LogicInference:
 #
 # print(_new_facts)
 
-_premises = {
-    parse_expr('t >> u'),
-    parse_expr('r >> (s | t)'),
-    parse_expr('(~p | q) >> r'),
-    parse_expr('~(s | u)'),
-}
-_conclusion = parse_expr('p')
+# _premises = {
+#     parse_expr('t => u'),
+#     parse_expr('r => (s | t)'),
+#     parse_expr('(~p | q) => r'),
+#     parse_expr('~(s | u)'),
+# }
+# _conclusion = parse_expr('p')
 
 # _premises = {
 #     parse_expr('p'),
-#     parse_expr('p >> q'),
+#     parse_expr('p => q'),
 #     parse_expr('s | r'),
-#     parse_expr('r >> ~q'),
+#     parse_expr('r => ~q'),
 # }
 # _conclusion = parse_expr('s | t')
 
 # _premises = {
-#     parse_expr('r >> (s | t)'),
-#     parse_expr('(~p | q) >> r'),
+#     parse_expr('r => (s | t)'),
+#     parse_expr('(~p | q) => r'),
 #     parse_expr('~s & ~u'),
-#     parse_expr('~u >> ~t'),
+#     parse_expr('~u => ~t'),
 # }
 # _conclusion = parse_expr('p')
 
-_resolved, _solution = LogicInference.resolve(_premises, _conclusion)
-print(_resolved)
-print('===================')
-for sol in _solution:
-    print(sol)
+# _resolved, _solution = LogicInference.resolve(_premises, _conclusion)
+# print(_resolved)
+# print('===================')
+# for sol in _solution:
+#     print(sol)
+#
+# from sympy.parsing.sympy_parser import *
+try:
+    print(parse_expr('p => q | r'))
+except Exception:
+    print('fail')
+
+
