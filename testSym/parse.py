@@ -2,7 +2,7 @@ import re
 from sympy import Symbol
 from sympy.logic.boolalg import *
 
-token_pat = re.compile("\s*(?:([a-z])|([|&~]|=>))")
+token_pat = re.compile("\s*(?:([a-z])|([|&~()]|=>))")
 
 
 def tokenize(program):
@@ -65,34 +65,34 @@ class literal_token(object):
 
 
 class operator_or_token(object):
-    lbp = 2
+    lbp = 4
 
     def led(self, left):
-        right = expression(2)
+        right = expression(4)
         return 'or', left, right
 
 
 class operator_not_token(object):
-    lbp = 3
+    lbp = 5
 
     def nud(self):
-        right = expression(3)
+        right = expression(5)
         return 'not', right
 
 
 class operator_and_token(object):
-    lbp = 2
+    lbp = 4
 
     def led(self, left):
-        right = expression(2)
+        right = expression(4)
         return 'and', left, right
 
 
 class operator_implies_token(object):
-    lbp = 1
+    lbp = 2
 
     def led(self, left):
-        right = expression(1)
+        right = expression(2)
         return 'implies', left, right
 
 
@@ -140,10 +140,10 @@ def ast2expr(ast):
 
 
 if __name__ == '__main__':
-    # program = '~p & q => a'
+    # program = '(~p & q => a) & t'
     # for variable, operator in token_pat.findall(program):
     #     print(variable, operator)
     try:
-        print(parse_expr('p & q => a | v | ~s & r | t'))
+        print(parse_expr('(p & q => a | v | (~s & r | t)) | f'))
     except SyntaxError as e:
         print('fail' + e.msg)
