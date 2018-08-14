@@ -126,7 +126,7 @@ class Rule:
 
     @staticmethod
     def convert_string_to_rule(string: str) -> (BooleanFunction, BooleanFunction):
-        rule_strings = string.split("=")
+        rule_strings = string.split("<=>")
 
         left_rule_ex = parse_expr(rule_strings[0])
         right_rule_ex = parse_expr(rule_strings[1])

@@ -28,7 +28,7 @@ expr_str2 = '(s | (p & ~r)) & (~p | ~p | ~s) & (r | ~p | ~q)'
 # expr_str = '((a => c) => (b => c)) => (a & b)'  # b ∧ (a ∨ ¬c)
 # expr_str = '(p & (p => (r & q)) & (r => (s | t)) & ~s) => t'  # true
 # expr_str = '((p | q) & (p => r) & (q => r)) => r'  # true
-# expr_str = '(p => r) | (q => r)'  # r ∨ ¬(p ∧ q)
+# expr_str = '(p => r) | (q => r)'  # r ∨ ¬p ∨ ¬q
 # expr_str = '(p & (p => q)) => q'  # true
 # expr_str = '~(~(p | q) & ~q)'  # p ∨ q
 # expr_str = '~p | (p & q)'  # q ∨ ¬p
@@ -52,7 +52,7 @@ expr_str2 = '(s | (p & ~r)) & (~p | ~p | ~s) & (r | ~p | ~q)'
 # expr_str = '(p & r) | ((p | s) & (p | a))'  # p ∨ (a ∧ s)
 # expr_str = '(p | (p & y)) => ((p & q) & (r & ~p))'  # ¬p
 # expr_str = '(p => ((~q | r) & ~s)) & (~s => (~r & p))'  # (p ∧ ¬q ∧ ¬r ∧ ¬s) ∨ (¬p ∧ s)
-# expr_str = '~(x & (y | z) & (~x | ~y | z))'  # ¬(x ∧ z)  # ¬(x ∧ z)
+# expr_str = '~(x & (y | z) & (~x | ~y | z))'  # ¬(x ∧ z)
 # expr_str = '~((x & y) => z)'  # x ∧ y ∧ ¬z
 # expr_str = '~(x | y | (~x & ~y & z))'  # ¬(x ∨ y ∨ z)
 # expr_str = '(m & n & p) | (m & p & ~p) | ~n'  # (m ∧ p) ∨ ¬n

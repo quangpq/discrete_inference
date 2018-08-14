@@ -166,7 +166,7 @@ class Reduce:
         return Reduce.reduce_2(ex)
 
     @staticmethod
-    def reduce_2(ex: BooleanFunction, remove_implies=False):
+    def reduce_2(ex: BooleanFunction):
 
         def apply_found_rule(_ex, _rule):
             nonlocal ex_list, rules, min_ex, temp_ex, old_ex_set
@@ -339,7 +339,7 @@ class Reduce:
         distribution_count = 0
         found_distribution = False
 
-        while found and (k_degree(temp_ex) > 0 or (remove_implies and temp_ex.atoms(Implies).__len__() > 0)):
+        while found and k_degree(temp_ex) > 0:
             found = False
 
             # Group 1
@@ -422,12 +422,12 @@ class Reduce:
         if simpler(ex1, ex2):
             ex1, ex2 = ex2, ex1
 
-        min_ex1, rules_1, expr_list_1 = Reduce.reduce_2(ex1, remove_implies=True)
+        min_ex1, rules_1, expr_list_1 = Reduce.reduce_2(ex1)
 
         if expr_list_1[-1] == ex2:
             return True, (ex1, rules_1, expr_list_1), None
 
-        min_ex2, rules_2, expr_list_2 = Reduce.reduce_2(ex2, remove_implies=True)
+        min_ex2, rules_2, expr_list_2 = Reduce.reduce_2(ex2)
 
         if expr_list_1[-1] == expr_list_2[-1]:
             return True, (ex1, rules_1, expr_list_1), (ex2, rules_2, expr_list_2)
