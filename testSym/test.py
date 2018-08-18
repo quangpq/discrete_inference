@@ -81,16 +81,16 @@ print(result)
 print("-------------------")
 if step_1 is not None:
     print("Cac luat cua bieu thuc")
-    ex1, rules_1, expr_list_1 = step_1
-    pprint(ex1)
+    _ex1, rules_1, expr_list_1 = step_1
+    pprint(_ex1)
     for ex, r in zip(expr_list_1, rules_1):
         print(r)
         pprint(ex)
 print("-------------------")
 if step_2 is not None:
     print("Cac luat cua bieu thuc")
-    ex2, rules_2, expr_list_2 = step_2
-    pprint(ex2)
+    _ex2, rules_2, expr_list_2 = step_2
+    pprint(_ex2)
     for ex, r in zip(expr_list_2, rules_2):
         print(r)
         pprint(ex)

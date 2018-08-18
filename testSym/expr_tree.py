@@ -68,6 +68,6 @@ def simpler_equal(ex_1: BooleanFunction, ex_2: BooleanFunction) -> bool:
 
 
 if __name__ == '__main__':
-    ex1 = parse_expr('(p & ~q) | (q & ~p)')
-    ex2 = parse_expr('(p | q) & (~p | ~q)')
-    print(simpler_equal(ex2, ex1))
+    _ex1 = parse_expr('(p & ~q) | (q & ~p)')
+    _ex2 = parse_expr('(p | q) & (~p | ~q)')
+    print(simpler_equal(_ex2, _ex1))
