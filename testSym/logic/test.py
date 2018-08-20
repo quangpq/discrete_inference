@@ -1,8 +1,4 @@
-from rule import *
-from reduce import *
-from logic_inference import *
-from expr_tree import simple_degree
-
+from logic.reduce import *
 
 # expr_str2 = 's | t | (True) | ~p | ~q'
 # expr_str2 = '(¬p ∧ ¬q) ∨ ¬p ∨ ¬q'

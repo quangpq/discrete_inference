@@ -1,7 +1,6 @@
-from sympy import *
 from sympy.logic.boolalg import *
-from typing import Optional, Set, Dict, List
-from parse import parse_expr
+from typing import Set, Dict, List
+from logic.parse import parse_expr
 import itertools
 
 InferenceRuleDict = Dict[BooleanFunction, List[BooleanFunction]]

@@ -1,5 +1,5 @@
-from rule import *
-from expr_tree import *
+from logic.rule import *
+from logic.expr_tree import *
 from typing import Optional, Set
 
 

@@ -1,6 +1,6 @@
 from sympy import *
 from sympy.logic.boolalg import *
-from parse import parse_expr
+from logic.parse import parse_expr
 
 def k_degree(ex: BooleanFunction) -> int:
     args = [ag for ag in postorder_traversal(ex) if
