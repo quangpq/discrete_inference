@@ -87,6 +87,10 @@
     {
       "name": "Luật kéo theo",
       "rule": "p => q <=> ~p | q"
+    },
+    {
+      "name": "Luật kéo theo",
+      "rule": "~(p => q) <=> p & ~q"
     }
   ],
   "group_5": [

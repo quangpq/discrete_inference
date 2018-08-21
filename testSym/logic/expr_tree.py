@@ -2,6 +2,7 @@ from sympy import *
 from sympy.logic.boolalg import *
 from logic.parse import parse_expr
 
+
 def k_degree(ex: BooleanFunction) -> int:
     args = [ag for ag in postorder_traversal(ex) if
             ag.func is Symbol or ag.func is BooleanFalse or ag.func is BooleanTrue]
@@ -65,6 +66,27 @@ def simpler_equal(ex_1: BooleanFunction, ex_2: BooleanFunction) -> bool:
         return False
 
     return True
+
+
+def convert_to_not(_expr: BooleanFunction) -> BooleanFunction:
+    if _expr.func is Not:
+        return _expr.args[0]
+    else:
+        return Not(_expr)
+
+
+def remove_double_not(_expr: BooleanFunction) -> BooleanFunction:
+    if _expr.func is Not and _expr.args[0].func is Not:
+        return _expr.args[0].args[0]
+    else:
+        return _expr
+
+
+def revert_not(_expr: BooleanFunction) -> BooleanFunction:
+    if _expr.func is Not:
+        return _expr.args[0]
+    else:
+        return Not(_expr)
 
 
 if __name__ == '__main__':

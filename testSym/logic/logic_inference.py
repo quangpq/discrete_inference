@@ -1,6 +1,7 @@
 from sympy.logic.boolalg import *
 from typing import Set, Dict, List
 from logic.parse import parse_expr
+from logic.expr_tree import convert_to_not
 import itertools
 
 InferenceRuleDict = Dict[BooleanFunction, List[BooleanFunction]]
@@ -158,7 +159,7 @@ class LogicInference:
         for ex in expr_to_convert:
             func = And if ex.args[0].func is Or else Or
             args = ex.args[0].args
-            new_arg = list(map(lambda sub_arg: LogicInference.convert_to_not(sub_arg), list(args)))
+            new_arg = list(map(lambda sub_arg: convert_to_not(sub_arg), list(args)))
             new_expr = func(*new_arg)
             new_facts[new_expr] = [ex]
 
@@ -199,13 +200,7 @@ class LogicInference:
                 new_facts[ex.args[1]] = [ex, lhs]
 
         return new_facts
-
-    @staticmethod
-    def convert_to_not(_expr: BooleanFunction) -> BooleanFunction:
-        if _expr.func is Not:
-            return _expr.args[0]
-        else:
-            return Not(_expr)
+    
 
     @staticmethod
     def modus_tollens_rule(expr_set: Set[BooleanFunction]) -> InferenceRuleDict:
@@ -216,11 +211,11 @@ class LogicInference:
 
         for ex in implies_expr:
             rhs = ex.args[1]
-            not_rhs = LogicInference.convert_to_not(rhs)
+            not_rhs = convert_to_not(rhs)
 
             if non_implies_expr.__contains__(not_rhs):
                 lhs = ex.args[0]
-                not_lhs = LogicInference.convert_to_not(lhs)
+                not_lhs = convert_to_not(lhs)
                 new_facts[not_lhs] = [ex, not_rhs]
 
         return new_facts
@@ -261,14 +256,14 @@ class LogicInference:
         for ex in or_expr:
             args = list(ex.args)
             for ag in args:
-                not_ag = LogicInference.convert_to_not(ag)
+                not_ag = convert_to_not(ag)
                 check_expr(not_ag, ex, [ag])
 
             for l in range(2, args.__len__(), 1):
                 combs = list(itertools.combinations(args, l))
                 for comb in combs:
                     comb_list = list(comb)
-                    not_exprs = list(map(lambda x: LogicInference.convert_to_not(x), comb_list))
+                    not_exprs = list(map(lambda x: convert_to_not(x), comb_list))
                     new_or_expr = Or(*not_exprs)
                     check_expr(new_or_expr, ex, comb_list)
 
@@ -321,11 +316,11 @@ class LogicInference:
         for ex in implies_expr:
             lhs = ex.args[0]
             rhs = ex.args[1]
-            not_rhs = LogicInference.convert_to_not(rhs)
+            not_rhs = convert_to_not(rhs)
 
             valid_implies_expr = list(filter(lambda x: x.args[0] == lhs and x.args[1] == not_rhs, implies_expr))
             if valid_implies_expr.__len__() > 0:
-                new_expr = LogicInference.convert_to_not(lhs)
+                new_expr = convert_to_not(lhs)
                 new_facts[new_expr] = [ex, valid_implies_expr[0]]
 
         return new_facts
