@@ -1,5 +1,5 @@
-from logic.reduce import *
-from logic.logic_simplify import logic_simplify_expr_string, equivalent_expr_string
+from .reduce import *
+from .logic_simplify import logic_simplify_expr_string, equivalent_expr_string
 
 # expr_str2 = 's | t | (True) | ~p | ~q'
 # expr_str2 = '(¬p ∧ ¬q) ∨ ¬p ∨ ¬q'

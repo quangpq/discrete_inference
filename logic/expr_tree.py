@@ -1,6 +1,6 @@
 from sympy import *
 from sympy.logic.boolalg import *
-from logic.parse import parse_expr
+from .parse import parse_expr
 
 
 def k_degree(ex: BooleanFunction) -> int:

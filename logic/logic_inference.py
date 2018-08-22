@@ -1,7 +1,7 @@
 from sympy.logic.boolalg import *
 from typing import Set, Dict, List
-from logic.parse import parse_expr
-from logic.expr_tree import convert_to_not
+from .parse import parse_expr
+from .expr_tree import convert_to_not
 import itertools
 
 InferenceRuleDict = Dict[BooleanFunction, List[BooleanFunction]]
