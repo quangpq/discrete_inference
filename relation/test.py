@@ -1,4 +1,4 @@
-from .lattice import Lattice
+from lattice import Lattice
 from graphviz import Source
 
 if __name__ == '__main__':

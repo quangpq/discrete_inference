@@ -1,7 +1,7 @@
 import json
 from sympy import *
 from sympy.logic.boolalg import *
-from .parse import parse_expr
+from parse import parse_expr
 import itertools
 
 

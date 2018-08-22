@@ -1,6 +1,6 @@
 from sympy import *
 from sympy.logic.boolalg import *
-from .expr_tree import convert_to_not, revert_not, remove_double_not
+from expr_tree import convert_to_not, revert_not, remove_double_not
 import itertools
 
 

@@ -1,4 +1,4 @@
-from .discrete_rules import *
+from discrete_rules import *
 
 
 class Discrete:
