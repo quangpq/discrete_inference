@@ -1,5 +1,3 @@
-from sympy import *
-from sympy.logic.boolalg import *
 from logic.expr_tree import simpler, k_degree
 from logic.parse import parse_expr
 from logic.logic_rules import *
@@ -161,3 +159,30 @@ def logic_simplify(ex: BooleanFunction):
     remove_useless_steps()
 
     return min_ex, rules, ex_list
+
+
+def equivalent_expr_string(ex_str_1: str, ex_str_2: str):
+    ex1 = parse_expr(ex_str_1)
+    ex2 = parse_expr(ex_str_2)
+    return equivalent(ex1, ex2)
+
+
+def equivalent(ex1: BooleanFunction, ex2: BooleanFunction):
+    if ex1 == ex2:
+        return True, None, None
+
+    if simpler(ex1, ex2):
+        ex1, ex2 = ex2, ex1
+
+    min_ex1, rules_1, expr_list_1 = logic_simplify(ex1)
+
+    for i, _expr in enumerate(expr_list_1):
+        if _expr == ex2:
+            return True, (ex1, rules_1, expr_list_1[:i]), None
+
+    min_ex2, rules_2, expr_list_2 = logic_simplify(ex2)
+
+    if expr_list_1[-1] == expr_list_2[-1]:
+        return True, (ex1, rules_1, expr_list_1), (ex2, rules_2, expr_list_2)
+
+    return False, None, None

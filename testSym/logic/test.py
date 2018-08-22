@@ -1,5 +1,5 @@
 from logic.reduce import *
-from logic.logic_simplify import logic_simplify_expr_string
+from logic.logic_simplify import logic_simplify_expr_string, equivalent_expr_string
 
 # expr_str2 = 's | t | (True) | ~p | ~q'
 # expr_str2 = '(¬p ∧ ¬q) ∨ ¬p ∨ ¬q'
@@ -52,43 +52,43 @@ expr_str2 = '(s | (p & ~r)) & (~p | ~p | ~s) & (r | ~p | ~q)'
 # expr_str = '~(x & (y | z) & (~x | ~y | z))'  # ¬(x ∧ z)
 # expr_str = '~((x & y) => z)'  # x ∧ y ∧ ¬z
 # expr_str = '~(x | y | (~x & ~y & z))'  # ¬(x ∨ y ∨ z)
-expr_str = '(m & n & p) | (m & p & ~p) | ~n'  # (m ∧ p) ∨ ¬n
+# expr_str = '(m & n & p) | (m & p & ~p) | ~n'  # (m ∧ p) ∨ ¬n
 
 # expr_str = '((p => q) & (q => r)) => (p => r)'  # True
 # expr_str = '~(p | ~(p & q))'  # false
 
-min_ex, rules, expr_list = logic_simplify_expr_string(expr_str)  # Reduce.reduce_2_expr_string(expr_str)
+# min_ex, rules, expr_list = logic_simplify_expr_string(expr_str)  # Reduce.reduce_2_expr_string(expr_str)
+#
+# print("-------------------")
+# pprint(min_ex)
+# print(rules.__len__())
+# print("-------------------")
+# for ex, r in zip(expr_list, rules):
+#     print(r)
+#     pprint(ex)
 
-print("-------------------")
-pprint(min_ex)
-print(rules.__len__())
-print("-------------------")
-for ex, r in zip(expr_list, rules):
-    print(r)
-    pprint(ex)
-
-# expr_str_1 = '(p => (q => (p & q & r)))'
-# expr_str_2 = 'q => (p => r)'
+expr_str_1 = '(p => (q => (p & q & r)))'
+expr_str_2 = 'q => (p => r)'
 
 # expr_str_1 = '(p | q) & (~p | ~q)'
 # expr_str_2 = '(p & ~q) | (~p & q)'
 #
-# result, step_1, step_2 = Reduce.equivalent_expr_string(expr_str_1, expr_str_2)
-# print("-------------------")
-# print(result)
-# print("-------------------")
-# if step_1 is not None:
-#     print("Cac luat cua bieu thuc")
-#     _ex1, rules_1, expr_list_1 = step_1
-#     pprint(_ex1)
-#     for ex, r in zip(expr_list_1, rules_1):
-#         print(r)
-#         pprint(ex)
-# print("-------------------")
-# if step_2 is not None:
-#     print("Cac luat cua bieu thuc")
-#     _ex2, rules_2, expr_list_2 = step_2
-#     pprint(_ex2)
-#     for ex, r in zip(expr_list_2, rules_2):
-#         print(r)
-#         pprint(ex)
+result, step_1, step_2 = equivalent_expr_string(expr_str_1, expr_str_2)
+print("-------------------")
+print(result)
+print("-------------------")
+if step_1 is not None:
+    print("Cac luat cua bieu thuc")
+    _ex1, rules_1, expr_list_1 = step_1
+    pprint(_ex1)
+    for ex, r in zip(expr_list_1, rules_1):
+        print(r)
+        pprint(ex)
+print("-------------------")
+if step_2 is not None:
+    print("Cac luat cua bieu thuc")
+    _ex2, rules_2, expr_list_2 = step_2
+    pprint(_ex2)
+    for ex, r in zip(expr_list_2, rules_2):
+        print(r)
+        pprint(ex)
