@@ -1,5 +1,6 @@
 from expr_tree import simpler, k_degree
 from logic_rules import *
+from parse import parse_expr
 
 
 def logic_simplify_expr_string(ex_str: str):
