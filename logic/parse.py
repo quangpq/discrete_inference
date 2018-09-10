@@ -47,10 +47,13 @@ def expression(rbp=0):
     token = gen.__next__()
     left = t.nud()
     try:
-        while rbp < token.lbp:
-            t = token
-            token = gen.__next__()
-            left = t.led(left)
+        if hasattr(token, 'lbp'):
+            while rbp < token.lbp:
+                t = token
+                token = gen.__next__()
+                left = t.led(left)
+        else:
+            raise SyntaxError('Syntax error')
     except Exception:
         raise
     return left

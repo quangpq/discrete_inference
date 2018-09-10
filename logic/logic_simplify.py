@@ -4,7 +4,10 @@ from parse import parse_expr
 
 
 def logic_simplify_expr_string(ex_str: str):
-    ex = parse_expr(ex_str)
+    try:
+        ex = parse_expr(ex_str)
+    except Exception:
+        raise
     return logic_simplify(ex)
 
 
