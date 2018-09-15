@@ -4,23 +4,40 @@ from itertools import combinations
 Relation = Set[Tuple]
 
 
+def check_relation(r: Relation, set_a: Set):
+    reflexive_of_r = reflexive(r, set_a)
+    symmetric_of_r = symmetric(r)
+    antisymmetric_of_r = antisymmetric(r)
+    transitive_of_r = transitive(r)
+
+    return '<span>Quan hệ có các tính chất:</span><ul>' + \
+           '<li>' + str_reflexive(reflexive_of_r) + '</li>' + \
+           '<li>' + str_symmetric(symmetric_of_r) + '</li>' + \
+           '<li>' + str_antisymmetric(antisymmetric_of_r) + '</li>' + \
+           '<li>' + str_transitive(transitive_of_r) + '</li></ul>'
+
+
 def check_order_relation(r: Relation, set_a: Set):
     reflexive_of_r = reflexive(r, set_a)
     antisymmetric_of_r = antisymmetric(r)
     transitive_of_r = transitive(r)
     full_order_of_r = check_full_order_relation(r, set_a)
 
-    negative_str = 'Quan hệ không phải một quan hệ thứ tự vì:\n'
+    negative_str = '<span>Quan hệ không phải một quan hệ thứ tự vì:</span><ul>'
     if reflexive_of_r[0] and antisymmetric_of_r[0] and transitive_of_r[0]:
-        return True, 'Quan hệ là một quan hệ thứ tự vì:\n' + str_reflexive(reflexive_of_r) + str_antisymmetric(
-            antisymmetric_of_r) + str_transitive(
-            transitive_of_r) + str_full_order_relation(full_order_of_r)
+        return True, '<span>Quan hệ là một quan hệ thứ tự vì:</span><ul>' + \
+               '<li>' + str_reflexive(reflexive_of_r) + '</li>' + \
+               '<li>' + str_antisymmetric(antisymmetric_of_r) + '</li>' + \
+               '<li>' + str_transitive(transitive_of_r) + '</li>' + \
+               '<li>' + str_full_order_relation(full_order_of_r) + '</li></ul>'
     elif not reflexive_of_r[0]:
-        negative_str += str_reflexive(reflexive_of_r)
+        negative_str += '<li>' + str_reflexive(reflexive_of_r) + '</li>'
     elif not antisymmetric_of_r[0]:
-        negative_str += str_antisymmetric(antisymmetric_of_r)
+        negative_str += '<li>' + str_antisymmetric(antisymmetric_of_r) + '</li>'
     elif not transitive_of_r[0]:
-        negative_str += str_transitive(transitive_of_r)
+        negative_str += '<li>' + str_transitive(transitive_of_r) + '</li>'
+
+    negative_str += "</ul>"
     return False, negative_str
 
 
@@ -28,13 +45,14 @@ def str_full_order_relation(result: (bool, List)):
     string = ''
     mes = result[1]
     if result[0]:
-        string += '\tQuan hệ là thứ tự toàn phần, vì:\n'
+        string += '<span>Quan hệ là thứ tự toàn phần, vì:</span><ul>'
         for m in mes:
-            string += f"\t\tVới {m[0]} ∈ R, ta có {m[1]} ∈ R\n"
+            string += f"<li>Với {m[0]} ∈ R, ta có {m[1]} ∈ R</li>"
     else:
-        string += '\tQuan hệ là thứ tự bán phần, vì:\n'
+        string += '<span>Quan hệ là thứ tự bán phần, vì:</span><ul>'
         for m in mes:
-            string += f'\t\tVới {m[0]} ∈ R, ta có {m[1]} ∉ R\n'
+            string += f'<li>Với {m[0]} ∈ R, ta có {m[1]} ∉ R</li>'
+    string += "</ul>"
     return string
 
 
@@ -53,17 +71,20 @@ def check_equivalence_relation(r: Relation, set_a: Set):
     symmetric_of_r = symmetric(r)
     transitive_of_r = transitive(r)
 
-    negative_str = 'Quan hệ không phải một quan hệ tương đương vì:\n'
+    negative_str = '<span>Quan hệ không phải một quan hệ tương đương vì:</span><ul>'
     if reflexive_of_r[0] and symmetric_of_r[0] and transitive_of_r[0]:
-        return True, 'Quan hệ là một quan hệ tương đương vì:\n' + str_reflexive(reflexive_of_r) + str_symmetric(
-            symmetric_of_r) + str_transitive(
-            transitive_of_r)
+        return True, '<span>Quan hệ là một quan hệ tương đương vì:</span><ul>' + \
+               '<li>' + str_reflexive(reflexive_of_r) + '</li>' + \
+               '<li>' + str_symmetric(symmetric_of_r) + '</li>' + \
+               '<li>' + str_transitive(transitive_of_r) + '</li></ul>'
     elif not reflexive_of_r[0]:
-        negative_str += str_reflexive(reflexive_of_r)
+        negative_str += '<li>' + str_reflexive(reflexive_of_r) + '</li>'
     elif not symmetric_of_r[0]:
-        negative_str += str_symmetric(symmetric_of_r)
+        negative_str += '<li>' + str_symmetric(symmetric_of_r) + '</li>'
     elif not transitive_of_r[0]:
-        negative_str += str_transitive(transitive_of_r)
+        negative_str += '<li>' + str_transitive(transitive_of_r) + '</li>'
+
+    negative_str += '</ul>'
     return False, negative_str
 
 
@@ -71,13 +92,14 @@ def str_reflexive(result: (bool, List)):
     string = ''
     mes = result[1]
     if result[0]:
-        string += '\tQuan hệ có tính phản xạ, vì:\n'
+        string += '<span>Quan hệ có tính phản xạ, vì:</span><ul>'
         for m in mes:
-            string += f"\t\tVới {m[0]} ∈ A, ta có {m[1]} ∈ R\n"
+            string += f"<li>Với {m[0]} ∈ A, ta có {m[1]} ∈ R</li>"
     else:
-        string += '\tQuan hệ không có tính phản xạ, vì:\n'
+        string += 'Quan hệ không có tính phản xạ, vì:</span><ul>'
         for m in mes:
-            string += f'\t\tVới {m[0]} ∈ A, ta có {m[1]} ∉ R\n'
+            string += f'<li>Với {m[0]} ∈ A, ta có {m[1]} ∉ R</li>'
+    string += "</ul>"
     return string
 
 
@@ -95,13 +117,14 @@ def str_symmetric(result: (bool, List)):
     string = ''
     mes = result[1]
     if result[0]:
-        string += '\tQuan hệ có tính đối xứng, vì:\n'
+        string += '<span>Quan hệ có tính đối xứng, vì:</span><ul>'
         for m in mes:
-            string += f'\t\tVới {m[0]} ∈ R, ta có {m[1]} ∈ R\n'
+            string += f'<li>Với {m[0]} ∈ R, ta có {m[1]} ∈ R</li>'
     else:
-        string += 'Quan hệ không có tính đối xứng, vì:\n'
+        string += '<span>Quan hệ không có tính đối xứng, vì:</span><ul>'
         for m in mes:
-            string += f'\t\tVới {m[0]} ∈ R, ta có {m[1]} ∉ R\n'
+            string += f'<li>Với {m[0]} ∈ R, ta có {m[1]} ∉ R</li>'
+    string += "</ul>"
     return string
 
 
@@ -124,13 +147,14 @@ def str_antisymmetric(result: (bool, List)):
     string = ''
     mes = result[1]
     if result[0]:
-        string += '\tQuan hệ có tính phản xứng, vì:\n'
+        string += '<span>Quan hệ có tính phản xứng, vì:</span><ul>'
         for m in mes:
-            string += f'\t\tVới {m[0]} ∈ R, ta có {m[1]} ∉ R\n'
+            string += f'<li>Với {m[0]} ∈ R, ta có {m[1]} ∉ R</li>'
     else:
-        string += '\tQuan hệ không có tính phản xứng, vì:\n'
+        string += '<span>Quan hệ không có tính phản xứng, vì:</span><ul>'
         for m in mes:
-            string += f'\t\tVới {m[0]} ∈ R, ta có {m[1]} ∈ R\n'
+            string += f'<li>Với {m[0]} ∈ R, ta có {m[1]} ∈ R</li>'
+    string += "</ul>"
     return string
 
 
@@ -150,13 +174,14 @@ def str_transitive(result: (bool, List)):
     string = ''
     mes = result[1]
     if result[0]:
-        string += '\tQuan hệ có tính bắc cầu, vì:\n'
+        string += '<span>Quan hệ có tính bắc cầu, vì:</span><ul>'
         for m in mes:
-            string += f'\t\tVới {m[0][0]},{m[0][1]} ∈ R, ta có {m[1]} ∈ R\n'
+            string += f'<li>Với {m[0][0]},{m[0][1]} ∈ R, ta có {m[1]} ∈ R</li>'
     else:
-        string += '\tQuan hệ không có tính bắc cầu, vì:\n'
+        string += '<span>Quan hệ không có tính bắc cầu, vì:</span><ul>'
         for m in mes:
-            string += f'\t\tVới {m[0][0]},{m[0][1]} ∈ R, ta có {m[1]} ∉ R\n'
+            string += f'<li>Với {m[0][0]},{m[0][1]} ∈ R, ta có {m[1]} ∉ R</li>'
+    string += "</ul>"
     return string
 
 

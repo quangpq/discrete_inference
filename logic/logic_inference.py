@@ -200,7 +200,6 @@ class LogicInference:
                 new_facts[ex.args[1]] = [ex, lhs]
 
         return new_facts
-    
 
     @staticmethod
     def modus_tollens_rule(expr_set: Set[BooleanFunction]) -> InferenceRuleDict:
@@ -501,9 +500,22 @@ class LogicInference:
 #     print(sol)
 #
 # from sympy.parsing.sympy_parser import *
-try:
-    print(parse_expr('p => q | r'))
-except Exception:
-    print('fail')
+# try:
+#     print(parse_expr('p => q | r'))
+# except Exception:
+#     print('fail')
 
+if __name__ == '__main__':
+    _premises = {
+        parse_expr('r => (s | t)'),
+        parse_expr('(~p | q) => r'),
+        parse_expr('~s & ~u'),
+        parse_expr('~u => ~t'),
+    }
+    _conclusion = parse_expr('p')
 
+    _resolved, _solution = LogicInference.resolve(_premises, _conclusion)
+    print(_resolved)
+    print('===================')
+    for sol in _solution:
+        print(sol)
