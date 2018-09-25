@@ -16,6 +16,7 @@ def converHTML2SQL(divTag):
         if 'id' in tag.attrs:
             k = tag.attrs['id']
             content = str(tag)
+            content = content.replace("\\", "\\\\").replace("'", "&quot;")
             statement = f'UPDATE `knowledges` SET `content`=\'{content}\' WHERE `keyphrase` = \'{k}\';\n'
             results.append(statement)
 
