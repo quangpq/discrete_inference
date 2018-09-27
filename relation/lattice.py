@@ -1,17 +1,18 @@
+import collections
+
+
 class Lattice(object):
-    def __init__(self, elements, join_func, meet_func):
+    def __init__(self, elements, le_func):
         """Create a lattice:
 
         Keyword arguments:
         elements -- list. The lattice set.
-        join_func  -- join function that operates to elements and returns the greatest element.
-        meet_func  -- meet function that operates to elements and returns the least element.
+        le_func  -- compare function that operates to elements.
 
         Returns a lattice instance.
         """
         self.elements = elements
-        self.join = join_func
-        self.meet = meet_func
+        self.less = le_func
 
     def wrap(self, index):
         """Wraps an object as a lattice element:
@@ -68,6 +69,16 @@ class Lattice(object):
                 bottom = next_bottom
         return bottom
 
+    def normalize_graph(self, graph):
+        a_set = set()
+        new_graph = dict()
+        for s, ds in graph.items():
+            new_ds = [x for x in ds if x not in a_set]
+            a_set = a_set.union(set(ds))
+            new_graph[s] = new_ds
+
+        return new_graph
+
     def hasse(self):
         graph = dict()
         for indexS, elementS in enumerate(self.elements):
@@ -77,6 +88,8 @@ class Lattice(object):
                     if not bool(sum([int(self.element_by_index(x) <= self.wrap(elementD)) for x in
                                      graph[indexS]])) and not elementS == elementD:
                         graph[indexS] += [indexD]
+
+        graph = self.normalize_graph(graph)
         dotcode = 'digraph G {\nsplines="line"\nrankdir=BT\n'
         top = self.top_elements(graph)
         bottom = self.bottom_elements(graph)
@@ -94,16 +107,12 @@ class Lattice(object):
                 dotcode += "\"" + str(self.element_by_index(d)) + "\""
                 dotcode += ";\n"
         dotcode += "}"
-        # try:
-        #     from scapy.all import do_graph
-        #     do_graph(dotcode)
-        # except:
-        #     pass
+
         return dotcode
 
     def __repr__(self):
         """Represents the lattice as an instance of Lattice."""
-        return 'Lattice(%s,%s,%s)' % (self.elements, self.join, self.meet)
+        return 'Lattice(%s,%s)' % (self.elements, self.less)
 
 
 class LatticeElement:
@@ -128,22 +137,10 @@ class LatticeElement:
         """Represents the lattice element as an instance of LatticeElement."""
         return "LatticeElement(L, %s)" % str(self)
 
-    def __and__(self, b):
-        # a.__and__(b) <=> a & b <=> meet(a,b)
-        return LatticeElement(self.lattice, self.lattice.meet(self.unwrap, b.unwrap))
-
-    def __or__(self, b):
-        # a.__or__(b) <=> a | b <=> join(a,b)
-        return LatticeElement(self.lattice, self.lattice.join(self.unwrap, b.unwrap))
-
     def __eq__(self, b):
-        # a.__eq__(b) <=> a = b <=> join(a,b)
         return self.unwrap == b.unwrap
 
     def __le__(self, b):
-        # a <= b if and only if a = a & b,
-        # or
-        # a <= b if and only if b = a | b,
         a = self
 
-        return (a == a & b) or (b == a | b)
+        return self.lattice.less(a.unwrap, b.unwrap)
